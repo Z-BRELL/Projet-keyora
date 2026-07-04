@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- LES ENUMS ---
+enum Role {
+  BUYER
+  SELLER
+  MODERATOR
+  ADMIN
+  SUPERADMIN
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  LAND
+  COMMERCIAL
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// --- LES MODÈLES ---
+
+model User {
+  id               String          @id @default(uuid())
+  fullName         String
+  email            String          @unique
+  passwordHash     String          
+  avatarUrl        String?
+  phone            String?
+  role             Role            @default(BUYER)
+  
+  isVerified       Boolean         @default(false)
+  verifyToken      String?
+  refreshToken     String?
+  lastLogin        DateTime?
+  
+  loginCount       Int             @default(0)
+  isActive         Boolean         @default(true)
+  
+  loginAttempts    Int             @default(0)
+  lockedUntil      DateTime?
+  
+  loginHistory     LoginHistory[]
+
+  listings         Listing[]       @relation("UserListings")
+  favorites        Favorite[]
+  messagesSent     Message[]       @relation("SentMessages")
+  messagesReceived Message[]       @relation("ReceivedMessages")
+  alertZones       AlertZone[]
+  moderations      ModerationLog[]
+  blogPosts        BlogPost[]      @relation("AuthorPosts")
+  reports          Report[]        @relation("ReportedListings")
+  moderatedReports Report[]        @relation("ModerationReports")
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  ip        String?
+  device    String?
+  timestamp DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model Listing {
+  id               String          @id @default(uuid())
+  title            String
+  description      String?
+  price            Float
+  type             ListingType     @default(SALE)
+  propertyType     PropertyType?
+  city             String?
+  address          String?         
+  area             Float?
+  rooms            Int?
+  bedrooms         Int?
+  livingRoom       Int?            
+  kitchen          Int?
+  bathrooms        Int?
+  floor            Int?            
+  latitude         Float?
+  longitude        Float?
+  
+  status           ListingStatus   @default(DRAFT)
+  viewCount        Int             @default(0)
+  publishedAt      DateTime?
+  rejectionNote    String?
+
+  ownerId          String
+  owner            User            @relation("UserListings", fields: [ownerId], references: [id])
+
+  photos           ListingPhoto[]
+  favorites        Favorite[]
+  moderationLogs   ModerationLog[]
+  alertMatches     AlertMatch[]
+  messages         Message[]
+  reports          Report[]
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model ListingPhoto {
+  id         String   @id @default(uuid())
+  url        String
+  position   Int      @default(0)
+  storageKey String?
+  
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+}
+
+model Favorite {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  savedAt   DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+model AlertZone {
+  id        String       @id @default(uuid())
+  label     String
+  geoJson   Json?        
+  filters   Json?        
+  active    Boolean      @default(true)
+  
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches   AlertMatch[]
+  createdAt DateTime     @default(now())
+}
+
+model AlertMatch {
+  id          String    @id @default(uuid())
+  alertZoneId String
+  alertZone   AlertZone @relation(fields: [alertZoneId], references: [id], onDelete: Cascade)
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  
+  @@unique([alertZoneId, listingId])
+}
+
+model ModerationLog {
+  id            String   @id @default(uuid())
+  listingId     String
+  listing       Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  moderatorId   String
+  moderator     User     @relation(fields: [moderatorId], references: [id])
+  action        String
+  reason        String?
+  rejectionNote String?  
+  createdAt     DateTime @default(now())
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  content     String?
+  read        Boolean  @default(false)
+  
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  
+  listingId   String?
+  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  sentAt      DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  deletedBySender    Boolean   @default(false)
+  deletedByRecipient Boolean   @default(false)
+  deletedForEveryone Boolean   @default(false)
+  deletedAt          DateTime?
+  deletionReason     String?
+
+  @@map("messages")
+}
+
+model Report {
+  id          String       @id @default(uuid())
+  listingId   String
+  listing     Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  reporterId  String
+  reporter    User         @relation("ReportedListings", fields: [reporterId], references: [id])
+  
+  reason      String
+  description String
+  status      ReportStatus @default(PENDING)
+  
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  moderator   User?        @relation("ModerationReports", fields: [resolvedBy], references: [id])
+  resolutionNotes String?
+
+  createdAt   DateTime @default(now())
+}
+
+model BlogCategory {
+  id        String         @id @default(uuid())
+  name      String
+  slug      String         @unique
+  posts     PostCategory[]
+}
+
+model BlogPost {
+  id         String       @id @default(uuid())
+  title      String
+  slug       String       @unique
+  excerpt    String?
+  content    String
+  coverUrl   String?
+  category   String?      // Blog category like "Investissement", "Guide Acheteur"
+  viewCount  Int          @default(0)  // Track number of views
+  status     PostStatus   @default(DRAFT)
+  publishedAt DateTime?
+  authorId   String
+  author     User         @relation("AuthorPosts", fields: [authorId], references: [id])
+  categories PostCategory[]
+  createdAt  DateTime     @default(now())
+}
+
+model PostCategory {
+  id         String       @id @default(uuid())
+  postId     String
+  post       BlogPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, categoryId])
+}
