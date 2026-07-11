@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
   Home, Eye, Heart, Clock, CheckCircle, XCircle,
-  Bell, MessageSquare, Plus, Users, ShieldCheck,
+  Bell, MessageSquare, Plus, Users, ShieldCheck, User, Settings,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { dashboardApi } from '@/lib/api';
@@ -101,6 +101,8 @@ export default function DashboardPage() {
               { href: '/dashboard/favorites', icon: <Heart className="w-5 h-5" />, label: 'Favoris', show: true },
               { href: '/dashboard/alerts', icon: <Bell className="w-5 h-5" />, label: 'Alertes', show: true },
               { href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', show: true },
+              { href: '/dashboard/profile', icon: <User className="w-5 h-5" />, label: 'Mon Profil', show: true },
+              { href: '/dashboard/settings', icon: <Settings className="w-5 h-5" />, label: 'Paramètres', show: true },
               { href: '/dashboard/moderation', icon: <ShieldCheck className="w-5 h-5" />, label: 'Modération', show: isModerator || isAdmin },
               { href: '/dashboard/admin-super', icon: <Users className="w-5 h-5" />, label: 'Admin Panel', show: isAdmin },
             ]

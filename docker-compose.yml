@@ -60,6 +60,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       PORT: 4000
       NODE_ENV: development
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-false}
     ports:
       - '4000:4000'
 

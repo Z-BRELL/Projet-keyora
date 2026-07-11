@@ -7,6 +7,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../common/mail/mail.service';
 import { ListingStatus, ModerationAction } from '../common/enums';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ModerationService {
@@ -14,6 +15,7 @@ export class ModerationService {
     private prisma: PrismaService,
     private events: EventEmitter2,
     private mail: MailService,
+    private notifications: NotificationsService,
   ) {}
 
   // ─── File d'attente ───────────────────────────────────────────────────────
@@ -60,6 +62,15 @@ export class ModerationService {
       'approved',
     );
 
+    // Créer une notification sur la plateforme
+    await this.notifications.create(
+      updated.ownerId,
+      'Annonce approuvée',
+      `Félicitations ! Votre annonce "${updated.title}" a été validée par la modération et est désormais en ligne.`,
+      'MODERATION',
+      `/listing/${updated.id}`,
+    ).catch(() => {});
+
     // Émettre l'événement pour les alertes de zone
     this.events.emit('listing.published', updated);
 
@@ -97,6 +108,15 @@ export class ModerationService {
       'rejected',
       reason,
     );
+
+    // Créer une notification sur la plateforme
+    await this.notifications.create(
+      updated.ownerId,
+      'Annonce rejetée',
+      `Votre annonce "${updated.title}" a été refusée par la modération. Motif : ${reason}`,
+      'MODERATION',
+      `/dashboard`,
+    ).catch(() => {});
 
     return { message: 'Annonce rejetée', listing: updated };
   }

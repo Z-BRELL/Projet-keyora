@@ -165,6 +165,7 @@ export default function ListingDetailPage() {
               <img
                 src={photos[photoIndex]}
                 alt={`Photo ${photoIndex + 1}`}
+                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'; }}
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
 
@@ -237,7 +238,7 @@ export default function ListingDetailPage() {
                         : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={p} className="w-full h-full object-cover" alt={`Miniature ${i + 1}`} />
+                    <img src={p} onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'; }} className="w-full h-full object-cover" alt={`Miniature ${i + 1}`} />
                     {i === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 text-white text-xs font-bold">
                         Ext.

@@ -56,7 +56,7 @@ export default function ListingDetailPage() {
                 {listing.photos?.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                     {listing.photos.map((photo: any) => (
-                      <img key={photo.id} src={photo.url} alt="" className="w-full h-32 object-cover rounded-lg" />
+                      <img key={photo.id} src={photo.url} alt={`Photo de l'annonce ${listing.title}`} className="w-full h-32 object-cover rounded-lg" />
                     ))}
                   </div>
                 )}

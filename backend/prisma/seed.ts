@@ -278,59 +278,87 @@ async function main() {
   console.log('✅ Articles de blog créés (6)');
 
   // 5. Création des annonces
-  await prisma.listing.createMany({
-    data: [
-      {
-        title: 'Villa moderne avec piscine — Bastos',
-        description: 'Superbe villa de standing dans le quartier diplomatique de Bastos. Piscine privée, jardin paysager, salon de réception, cuisine américaine équipée, 4 chambres avec dressing, 3 salles de bain. Gardiennage 24h/24.',
-        type: ListingType.SALE,
-        propertyType: PropertyType.HOUSE,
-        price: 180000000,
-        area: 320,
-        rooms: 4,
-        bathrooms: 3,
-        address: 'Avenue Bastos',
-        city: 'Yaoundé',
-        latitude: 3.8854,
-        longitude: 11.5165,
-        status: ListingStatus.PUBLISHED,
-        publishedAt: new Date(),
-        ownerId: seller.id,
-      },
-      {
-        title: 'Appartement de luxe meublé — Golf',
-        description: 'Bel appartement très bien situé près du club de Golf. Proche de toutes commodités. Idéal pour des longs séjours.',
-        type: ListingType.RENT,
-        propertyType: PropertyType.APARTMENT,
-        price: 350000,
-        area: 120,
-        rooms: 3,
-        bathrooms: 2,
-        address: 'Quartier Golf',
-        city: 'Yaoundé',
-        latitude: 3.8900,
-        longitude: 11.5200,
-        status: ListingStatus.PUBLISHED,
-        publishedAt: new Date(),
-        ownerId: seller.id,
-      },
-      {
-        title: 'Terrain titré constructible — Odza',
-        description: 'Grand terrain plat et titré dans un quartier résidentiel. Excellent pour un projet immobilier à forte valeur locative.',
-        type: ListingType.SALE,
-        propertyType: PropertyType.LAND,
-        price: 45000000,
-        area: 1000,
-        rooms: 0,
-        bathrooms: 0,
-        address: 'Odza Borne 10',
-        city: 'Yaoundé',
-        latitude: 3.8200,
-        longitude: 11.5300,
-        status: ListingStatus.PENDING,
-        ownerId: seller.id,
-      },
-    ],
+  await prisma.listing.create({
+    data: {
+      title: 'Villa moderne avec piscine — Bastos',
+      description: 'Superbe villa de standing dans le quartier diplomatique de Bastos. Piscine privée, jardin paysager, salon de réception, cuisine américaine équipée, 4 chambres avec dressing, 3 salles de bain. Gardiennage 24h/24.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.HOUSE,
+      price: 180000000,
+      area: 320,
+      rooms: 6,
+      bedrooms: 4,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 3,
+      address: 'Avenue Bastos',
+      city: 'Yaoundé',
+      latitude: 3.8854,
+      longitude: 11.5165,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: seller.id,
+      photos: {
+        create: [
+          { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800', position: 0 }
+        ]
+      }
+    }
+  });
+
+  await prisma.listing.create({
+    data: {
+      title: 'Appartement de luxe meublé — Golf',
+      description: 'Bel appartement très bien situé près du club de Golf. Proche de toutes commodités. Idéal pour des longs séjours.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.APARTMENT,
+      price: 350000,
+      area: 120,
+      rooms: 4,
+      bedrooms: 2,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 2,
+      address: 'Quartier Golf',
+      city: 'Yaoundé',
+      latitude: 3.8900,
+      longitude: 11.5200,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: seller.id,
+      photos: {
+        create: [
+          { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800', position: 0 }
+        ]
+      }
+    }
+  });
+
+  await prisma.listing.create({
+    data: {
+      title: 'Terrain titré constructible — Odza',
+      description: 'Grand terrain plat et titré dans un quartier résidentiel. Excellent pour un projet immobilier à forte valeur locative.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.LAND,
+      price: 45000000,
+      area: 1000,
+      rooms: null,
+      bathrooms: null,
+      bedrooms: null,
+      livingRoom: null,
+      kitchen: null,
+      address: 'Odza Borne 10',
+      city: 'Yaoundé',
+      latitude: 3.8200,
+      longitude: 11.5300,
+      status: ListingStatus.PENDING,
+      ownerId: seller.id,
+      photos: {
+        create: [
+          { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800', position: 0 }
+        ]
+      }
+    }
   });
 
   console.log('✅ Annonces créées (3)');

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { messagesApi } from '@/lib/api';
+import { messagesApi, usersApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useMessageStream } from '@/lib/useMessageStream';
 import { format } from 'date-fns';
@@ -64,6 +64,20 @@ export default function MessagesPageContent() {
       }
     },
     enabled: isMounted && !!user && !!selectedChat,
+  });
+
+  const { data: searchResults = [], isLoading: loadingSearch } = useQuery<any[]>({
+    queryKey: ['user-search', searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim() || searchQuery.trim().length < 2) return [];
+      try {
+        const response = await usersApi.search(searchQuery.trim());
+        return response.data || [];
+      } catch {
+        return [];
+      }
+    },
+    enabled: isMounted && !!user && searchQuery.trim().length >= 2,
   });
 
   // Websockets / SSE
@@ -130,6 +144,9 @@ export default function MessagesPageContent() {
     onSuccess: () => {
       setNewMessage('');
       inputRef.current?.focus();
+      refetch();
+      refetchConversations();
+      setTimeout(() => scrollToBottom(), 100);
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || "Erreur lors de l'envoi du message");
@@ -142,7 +159,18 @@ export default function MessagesPageContent() {
     sendMutation.mutate(newMessage);
   };
 
-  const selectedConversation = conversations.find((c: any) => c.contactId === selectedChat);
+  const selectedConversation = conversations.find((c: any) => c.contactId === selectedChat) || (() => {
+    const searchedUser = searchResults.find((u: any) => u.id === selectedChat);
+    if (searchedUser) {
+      return {
+        contactId: searchedUser.id,
+        contactName: searchedUser.fullName,
+        avatarUrl: searchedUser.avatarUrl,
+      };
+    }
+    return null;
+  })();
+
   const activeListing = selectedConversation?.lastMessageListing || (listingId ? {
     id: listingId,
     title: listingTitle,
@@ -189,48 +217,105 @@ export default function MessagesPageContent() {
               <div className="flex justify-center p-8">
                 <Loader2 className="w-6 h-6 animate-spin text-secondary" />
               </div>
-            ) : filteredConversations.length === 0 ? (
-              <p className="p-6 text-center text-sm text-on-surface-variant">Aucune conversation.</p>
             ) : (
-              filteredConversations.map((chat: any) => {
-                const isActive = selectedChat === chat.contactId;
-                return (
-                  <div 
-                    key={chat.contactId}
-                    onClick={() => setSelectedChat(chat.contactId)}
-                    className={`p-md border-b border-outline-variant cursor-pointer transition-colors relative ${isActive ? 'bg-surface-container-low hover:bg-surface-container' : 'hover:bg-surface-container-low'}`}
-                  >
-                    {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary rounded-r-full"></div>}
-                    <div className="flex gap-md items-start">
-                      <div className="relative flex-shrink-0">
-                        {chat.avatarUrl ? (
-                          <img src={chat.avatarUrl} alt={chat.contactName} className="w-12 h-12 rounded-full object-cover border-2 border-surface-container-lowest" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-primary font-bold font-body-lg text-body-lg">
-                            {chat.contactName?.charAt(0).toUpperCase() || 'U'}
-                          </div>
-                        )}
-                        {chat.unread && (
-                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-surface-container-lowest"></div>
-                        )}
-                      </div>
-                      <div className="flex-grow min-w-0">
-                        <div className="flex justify-between items-baseline mb-xs">
-                          <h3 className={`font-label-md text-label-md truncate ${chat.unread ? 'text-on-surface font-bold' : 'text-on-surface'}`}>
-                            {chat.contactName || 'Unknown'}
-                          </h3>
-                          <span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">
-                            {chat.lastMessageDate && format(new Date(chat.lastMessageDate), 'HH:mm')}
-                          </span>
+              <>
+                {/* Active chats */}
+                {filteredConversations.map((chat: any) => {
+                  const isActive = selectedChat === chat.contactId;
+                  return (
+                    <div 
+                      key={chat.contactId}
+                      onClick={() => setSelectedChat(chat.contactId)}
+                      className={`p-md border-b border-outline-variant cursor-pointer transition-colors relative ${isActive ? 'bg-surface-container-low hover:bg-surface-container' : 'hover:bg-surface-container-low'}`}
+                    >
+                      {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary rounded-r-full"></div>}
+                      <div className="flex gap-md items-start">
+                        <div className="relative flex-shrink-0">
+                          {chat.avatarUrl ? (
+                            <img src={chat.avatarUrl} alt={chat.contactName} className="w-12 h-12 rounded-full object-cover border-2 border-surface-container-lowest" />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-primary font-bold font-body-lg text-body-lg">
+                              {chat.contactName?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                          )}
+                          {chat.unread && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-surface-container-lowest"></div>
+                          )}
                         </div>
-                        <p className={`font-body-sm text-body-sm truncate ${chat.unread ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
-                          {chat.lastMessage || '...'}
-                        </p>
+                        <div className="flex-grow min-w-0">
+                          <div className="flex justify-between items-baseline mb-xs">
+                            <h3 className={`font-label-md text-label-md truncate ${chat.unread ? 'text-on-surface font-bold' : 'text-on-surface'}`}>
+                              {chat.contactName || 'Unknown'}
+                            </h3>
+                            <span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">
+                              {chat.lastMessageDate && format(new Date(chat.lastMessageDate), 'HH:mm')}
+                            </span>
+                          </div>
+                          <p className={`font-body-sm text-body-sm truncate ${chat.unread ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
+                            {chat.lastMessage || '...'}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                  );
+                })}
+
+                {/* Global Search Results */}
+                {searchQuery.trim().length >= 2 && (
+                  <div>
+                    <div className="px-md py-2 bg-orange-50/50 text-xs font-bold text-orange-600 uppercase tracking-wider border-b border-outline-variant">
+                      Utilisateurs sur Keyora
+                    </div>
+                    {loadingSearch ? (
+                      <div className="flex justify-center p-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-secondary" />
+                      </div>
+                    ) : searchResults.filter((u: any) => !conversations.some((c: any) => c.contactId === u.id)).length === 0 ? (
+                      <p className="p-4 text-center text-xs text-on-surface-variant">Aucun autre utilisateur trouvé.</p>
+                    ) : (
+                      searchResults
+                        .filter((u: any) => !conversations.some((c: any) => c.contactId === u.id))
+                        .map((u: any) => {
+                          const isActive = selectedChat === u.id;
+                          return (
+                            <div
+                              key={u.id}
+                              onClick={() => {
+                                setSelectedChat(u.id);
+                                setSearchQuery('');
+                              }}
+                              className={`p-md border-b border-outline-variant cursor-pointer transition-colors relative ${isActive ? 'bg-surface-container-low hover:bg-surface-container' : 'hover:bg-surface-container-low'}`}
+                            >
+                              <div className="flex gap-md items-center">
+                                <div className="flex-shrink-0">
+                                  {u.avatarUrl ? (
+                                    <img src={u.avatarUrl} alt={u.fullName} className="w-10 h-10 rounded-full object-cover border border-outline-variant" />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary font-bold">
+                                      {u.fullName?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <h3 className="font-label-md text-label-md truncate text-on-surface">
+                                    {u.fullName}
+                                  </h3>
+                                  <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-semibold uppercase">
+                                    {u.role === 'BUYER' ? 'Acheteur' : u.role === 'SELLER' ? 'Vendeur' : u.role}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
                   </div>
-                );
-              })
+                )}
+
+                {filteredConversations.length === 0 && searchQuery.trim().length < 2 && (
+                  <p className="p-6 text-center text-sm text-on-surface-variant">Aucune conversation.</p>
+                )}
+              </>
             )}
           </div>
         </aside>

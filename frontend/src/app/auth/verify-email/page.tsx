@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -11,6 +12,7 @@ function VerifyEmailContent() {
   const token = searchParams.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
+  const { setAuth } = useAuthStore();
 
   useEffect(() => {
     if (!token) {
@@ -25,9 +27,11 @@ function VerifyEmailContent() {
         const response = await fetch(`${apiUrl}/api/auth/verify-email?token=${token}`);
         
         if (response.ok) {
+          const data = await response.json();
+          setAuth(data.user, data.accessToken, data.refreshToken);
           setStatus('success');
-          setMessage('Email vérifié avec succès! Vous pouvez maintenant vous connecter.');
-          setTimeout(() => router.push('/auth/login'), 3000);
+          setMessage('Email vérifié avec succès ! Connexion automatique en cours...');
+          setTimeout(() => router.push('/dashboard'), 2000);
         } else {
           const error = await response.json();
           setStatus('error');
@@ -40,7 +44,7 @@ function VerifyEmailContent() {
     };
 
     verifyEmail();
-  }, [token, router]);
+  }, [token, router, setAuth]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">

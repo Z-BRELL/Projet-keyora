@@ -12,9 +12,11 @@ import { SearchModule } from './search/search.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { MediaModule } from './media/media.module';
 import { MessagesModule } from './messages/messages.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { BlogModule } from './blog/blog.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
+import { SupportRequestsModule } from './support-requests/support-requests.module';
 
 @Module({
   imports: [
@@ -34,9 +36,11 @@ import { ReportsModule } from './reports/reports.module';
     AlertsModule,
     MediaModule,
     MessagesModule,
+    NotificationsModule,
     BlogModule,
     DashboardModule,
     ReportsModule,
+    SupportRequestsModule,
   ],
 })
 export class AppModule {}

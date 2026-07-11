@@ -28,6 +28,7 @@ export function ListingCard({ listing }: { listing: any }) {
           <img 
             src={imageUrl} 
             alt={listing?.title || 'Annonce immobilière'} 
+            onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=500&h=300&fit=crop'; }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
           />
           <div className="absolute top-4 left-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-md">
@@ -55,9 +56,35 @@ export function ListingCard({ listing }: { listing: any }) {
           
           {/* Statistiques (Chambres, Salles de bain, Surface) */}
           <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
-            <span className="flex items-center gap-1 font-medium"><Bed size={16} className="text-gray-400"/> {listing?.bedrooms || 0} ch.</span>
-            <span className="flex items-center gap-1 font-medium"><Bath size={16} className="text-gray-400"/> {listing?.bathrooms || 0} sdb.</span>
-            <span className="flex items-center gap-1 font-medium"><Square size={16} className="text-gray-400"/> {listing?.area || 0} m²</span>
+            {listing?.propertyType === 'LAND' ? (
+              <span className="flex items-center gap-1.5 font-medium w-full justify-center text-orange-600 bg-orange-50/50 py-1.5 rounded-lg border border-orange-100/50">
+                <Square size={16} className="text-orange-500" />
+                Surface : <span className="font-extrabold">{listing?.area || 0} m²</span>
+              </span>
+            ) : listing?.propertyType === 'COMMERCIAL' ? (
+              <>
+                {listing?.bathrooms > 0 ? (
+                  <span className="flex items-center gap-1 font-medium"><Bath size={16} className="text-gray-400"/> {listing.bathrooms} sdb.</span>
+                ) : (
+                  <span className="flex items-center gap-1 font-medium text-gray-400">Usage Commercial</span>
+                )}
+                <span className="flex items-center gap-1 font-medium"><Square size={16} className="text-gray-400"/> {listing?.area || 0} m²</span>
+              </>
+            ) : (
+              <>
+                <span className="flex items-center gap-1 font-medium">
+                  <Bed size={16} className="text-gray-400"/>{' '}
+                  {listing?.bedrooms || (listing?.rooms ? Math.max(1, listing.rooms - 2) : 1)} ch.
+                </span>
+                <span className="flex items-center gap-1 font-medium">
+                  <Bath size={16} className="text-gray-400"/>{' '}
+                  {listing?.bathrooms || 1} sdb.
+                </span>
+                <span className="flex items-center gap-1 font-medium">
+                  <Square size={16} className="text-gray-400"/> {listing?.area || 0} m²
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>

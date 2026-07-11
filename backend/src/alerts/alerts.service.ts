@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../common/mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AlertsService {
@@ -10,6 +11,7 @@ export class AlertsService {
   constructor(
     private prisma: PrismaService,
     private mail: MailService,
+    private notifications: NotificationsService,
   ) {}
 
   // ─── Créer une zone d'alerte ──────────────────────────────────────────────
@@ -117,6 +119,15 @@ export class AlertsService {
             city: listing.city,
           },
         );
+
+        // Créer une notification sur la plateforme
+        await this.notifications.create(
+          zone.userId,
+          'Alerte immobilière',
+          `Un nouveau bien correspondant à votre alerte "${zone.label}" a été publié à ${listing.city || ''} (${listing.price} €)`,
+          'ALERT',
+          `/listing/${listing.id}`,
+        ).catch(() => {});
 
         this.logger.log(`[Alertes] Email envoyé à ${zone.user.email} pour la zone "${zone.label}"`);
       }

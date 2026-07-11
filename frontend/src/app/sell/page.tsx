@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
@@ -8,32 +8,99 @@ import toast from 'react-hot-toast';
 import { AlertCircle, CheckCircle, Home, MapPin, FileText, DollarSign, ImagePlus, X, Building, Loader2, Ruler, Bed, Sofa, UtensilsCrossed, Bath } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { listingsApi } from '@/lib/api';
+import { listingsApi, searchApi } from '@/lib/api';
+
+const STORAGE_KEY = 'keyora_sell_form';
+
+interface FormData {
+  title: string;
+  type: string;
+  propertyType: string;
+  price: string;
+  city: string;
+  address: string;
+  description: string;
+  area: string;
+  rooms: string;
+  bedrooms: string;
+  livingRoom: string;
+  kitchen: string;
+  bathrooms: string;
+}
+
+const emptyForm: FormData = {
+  title: '',
+  type: 'SALE',
+  propertyType: 'HOUSE',
+  price: '',
+  city: '',
+  address: '',
+  description: '',
+  area: '',
+  rooms: '',
+  bedrooms: '',
+  livingRoom: '',
+  kitchen: '',
+  bathrooms: '',
+};
 
 export default function SellPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    type: 'SALE',
-    propertyType: 'HOUSE',
-    price: '',
-    city: '',
-    address: '',
-    description: '',
-    area: '',
-    rooms: '',
-    bedrooms: '',
-    livingRoom: '',
-    kitchen: '',
-    bathrooms: '',
-  });
-
+  const [formData, setFormData] = useState<FormData>(emptyForm);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+
+  // Restaurer le formulaire depuis localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch {}
+  }, []);
+
+  // Sauvegarder dans localStorage à chaque changement
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    } catch {}
+  }, [formData]);
+
+  // Autocomplétion ville
+  const fetchCitySuggestions = useCallback(async (query: string) => {
+    if (query.trim().length < 2) {
+      setCitySuggestions([]);
+      return;
+    }
+    try {
+      const res = await searchApi.cities(query);
+      setCitySuggestions(res.data || []);
+      setShowCitySuggestions(true);
+    } catch {
+      setCitySuggestions([]);
+    }
+  }, []);
+
+  let cityTimeout: ReturnType<typeof setTimeout>;
+  const handleCityChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, city: value }));
+    clearTimeout(cityTimeout);
+    cityTimeout = setTimeout(() => fetchCitySuggestions(value), 300);
+  };
+
+  const selectCity = (city: string) => {
+    setFormData((prev) => ({ ...prev, city }));
+    setShowCitySuggestions(false);
+    setCitySuggestions([]);
+  };
 
   const validateField = (name: string, value: string) => {
     let message = '';
@@ -74,6 +141,7 @@ export default function SellPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const nextErrors: Record<string, string> = {};
 
@@ -88,21 +156,23 @@ export default function SellPage() {
 
     if (Object.keys(nextErrors).length > 0) {
       toast.error('Corrigez les champs signalés avant de soumettre.');
+      setLoading(false);
       return;
     }
 
     if (!user) {
       toast.error('Vous devez être connecté pour soumettre une annonce.');
       router.push('/auth/login');
+      setLoading(false);
       return;
     }
 
     if (!formData.title.trim() || !formData.price || !formData.city.trim() || !formData.description.trim()) {
       toast.error('Veuillez remplir tous les champs obligatoires avant de soumettre.');
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
     const loadingToast = toast.loading("Création de votre annonce en cours...");
 
     try {
@@ -136,6 +206,8 @@ export default function SellPage() {
       await listingsApi.submit(newListingId);
 
       toast.success('Félicitations ! Votre annonce est en attente de modération.', { id: loadingToast });
+
+      localStorage.removeItem(STORAGE_KEY);
       
       router.push('/dashboard');
 
@@ -172,6 +244,22 @@ export default function SellPage() {
           </div>
         )}
 
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem(STORAGE_KEY);
+              setFormData(emptyForm);
+              setImages([]);
+              setPreviews([]);
+              setErrors({});
+              toast.success('Formulaire réinitialisé');
+            }}
+            className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+          >
+            Réinitialiser le formulaire
+          </button>
+        </div>
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 space-y-8">
           
           {/* Section 1: Informations de base */}
@@ -214,7 +302,20 @@ export default function SellPage() {
                 </label>
                 <select 
                   value={formData.propertyType}
-                  onChange={(e) => setFormData({...formData, propertyType: e.target.value})}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setFormData((prev) => {
+                      const updated = { ...prev, propertyType: newType };
+                      if (newType === 'LAND') {
+                        updated.rooms = '';
+                        updated.bedrooms = '';
+                        updated.livingRoom = '';
+                        updated.kitchen = '';
+                        updated.bathrooms = '';
+                      }
+                      return updated;
+                    });
+                  }}
                   className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all cursor-pointer"
                 >
                   <option value="HOUSE">Maison / Villa</option>
@@ -231,6 +332,7 @@ export default function SellPage() {
                 <input 
                   type="number" 
                   placeholder="Ex: 50000000" 
+                  min="1"
                   value={formData.price}
                   onChange={(e) => {
                     setFormData({...formData, price: e.target.value});
@@ -250,19 +352,35 @@ export default function SellPage() {
               <MapPin className="w-5 h-5 text-orange-500" /> Localisation
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="relative">
                 <label className="text-sm font-bold text-gray-700 mb-2 block">Ville *</label>
                 <input 
                   type="text" 
                   placeholder="Ex: Yaoundé" 
                   value={formData.city}
                   onChange={(e) => {
-                    setFormData({...formData, city: e.target.value});
+                    handleCityChange(e.target.value);
                     validateField('city', e.target.value);
                   }}
+                  onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
                   className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                   required
                 />
+                {showCitySuggestions && citySuggestions.length > 0 && (
+                  <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    {citySuggestions.map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onMouseDown={() => selectCity(city)}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {errors.city && <p className="mt-2 text-sm text-red-600">{errors.city}</p>}
               </div>
 
@@ -292,6 +410,7 @@ export default function SellPage() {
                 <input 
                   type="number" 
                   placeholder="Ex: 250" 
+                  min="1"
                   value={formData.area}
                   onChange={(e) => {
                     setFormData({...formData, area: e.target.value});
@@ -302,90 +421,95 @@ export default function SellPage() {
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <Home className="w-4 h-4 text-orange-500" /> Nombre total de pièces *
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="Ex: 6" 
-                  value={formData.rooms}
-                  onChange={(e) => {
-                    setFormData({...formData, rooms: e.target.value});
-                    validateField('rooms', e.target.value);
-                  }}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  required
-                />
-              </div>
+              {formData.propertyType !== 'LAND' && (
+                <>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                      <Home className="w-4 h-4 text-orange-500" /> Nombre total de pièces *
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 6" 
+                      min="1"
+                      value={formData.rooms}
+                      onChange={(e) => {
+                        setFormData({...formData, rooms: e.target.value});
+                        validateField('rooms', e.target.value);
+                      }}
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <Bed className="w-4 h-4 text-orange-500" /> Chambres *
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="Ex: 3" 
-                  value={formData.bedrooms}
-                  onChange={(e) => {
-                    setFormData({...formData, bedrooms: e.target.value});
-                    validateField('bedrooms', e.target.value);
-                  }}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                      <Bed className="w-4 h-4 text-orange-500" /> Chambres *
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 3" 
+                      value={formData.bedrooms}
+                      onChange={(e) => {
+                        setFormData({...formData, bedrooms: e.target.value});
+                        validateField('bedrooms', e.target.value);
+                      }}
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <Sofa className="w-4 h-4 text-orange-500" /> Salon / Séjour *
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="Ex: 1" 
-                  value={formData.livingRoom}
-                  onChange={(e) => {
-                    setFormData({...formData, livingRoom: e.target.value});
-                    validateField('livingRoom', e.target.value);
-                  }}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                      <Sofa className="w-4 h-4 text-orange-500" /> Salon / Séjour *
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 1" 
+                      value={formData.livingRoom}
+                      onChange={(e) => {
+                        setFormData({...formData, livingRoom: e.target.value});
+                        validateField('livingRoom', e.target.value);
+                      }}
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <UtensilsCrossed className="w-4 h-4 text-orange-500" /> Cuisine *
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="Ex: 1" 
-                  value={formData.kitchen}
-                  onChange={(e) => {
-                    setFormData({...formData, kitchen: e.target.value});
-                    validateField('kitchen', e.target.value);
-                  }}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                      <UtensilsCrossed className="w-4 h-4 text-orange-500" /> Cuisine *
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 1" 
+                      value={formData.kitchen}
+                      onChange={(e) => {
+                        setFormData({...formData, kitchen: e.target.value});
+                        validateField('kitchen', e.target.value);
+                      }}
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <Bath className="w-4 h-4 text-orange-500" /> Salle de bain *
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="Ex: 2" 
-                  value={formData.bathrooms}
-                  onChange={(e) => {
-                    setFormData({...formData, bathrooms: e.target.value});
-                    validateField('bathrooms', e.target.value);
-                  }}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                      <Bath className="w-4 h-4 text-orange-500" /> Salle de bain *
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 2" 
+                      value={formData.bathrooms}
+                      onChange={(e) => {
+                        setFormData({...formData, bathrooms: e.target.value});
+                        validateField('bathrooms', e.target.value);
+                      }}
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

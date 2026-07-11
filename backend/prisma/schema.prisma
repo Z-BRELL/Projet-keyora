@@ -79,6 +79,7 @@ model User {
   blogPosts        BlogPost[]      @relation("AuthorPosts")
   reports          Report[]        @relation("ReportedListings")
   moderatedReports Report[]        @relation("ModerationReports")
+  notifications    Notification[]
 
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
@@ -269,4 +270,27 @@ model PostCategory {
   category   BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([postId, categoryId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  type      String   // e.g. "MESSAGE", "MODERATION", "ALERT"
+  read      Boolean  @default(false)
+  link      String?  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SupportRequest {
+  id        String   @id @default(uuid())
+  fullName  String
+  email     String
+  message   String
+  status    String   @default("PENDING") // PENDING, RESOLVED
+  createdAt DateTime @default(now())
 }

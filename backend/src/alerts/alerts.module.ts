@@ -8,6 +8,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AlertsService } from './alerts.service';
 import { JwtAuthGuard } from '../common/guards';
 import { CurrentUser } from '../common/decorators';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 class CreateAlertZoneDto {
   @ApiProperty({ example: 'Bastos - Yaoundé' })
@@ -76,6 +77,7 @@ export class AlertsController {
 }
 
 @Module({
+  imports: [NotificationsModule],
   controllers: [AlertsController],
   providers: [AlertsService],
 })

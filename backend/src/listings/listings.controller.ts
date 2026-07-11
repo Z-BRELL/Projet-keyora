@@ -29,7 +29,7 @@ import {
   UpdateListingDto,
   ListingQueryDto,
 } from './dto/listing.dto';
-import { JwtAuthGuard, RolesGuard } from '../common/guards';
+import { JwtAuthGuard, RolesGuard, OptionalJwtAuthGuard } from '../common/guards';
 import { CurrentUser, Roles } from '../common/decorators';
 import { Role } from '../common/enums';
 
@@ -52,6 +52,24 @@ export class ListingsController {
     @Query('limit') limit = 20,
   ) {
     return this.listingsService.getAllListingsForAdmin(status, +page, +limit);
+  }
+
+  @Get('admin/user-listings/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SUPERADMIN, Role.MODERATOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Toutes les annonces d\'un utilisateur (Admin/Moderator)' })
+  getUserListingsForAdmin(@Param('userId') userId: string) {
+    return this.listingsService.getMyListings(userId);
+  }
+
+  @Delete('admin/bulk-delete/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Supprimer toutes les annonces d\'un utilisateur (SuperAdmin)' })
+  bulkDeleteUserListings(@Param('userId') userId: string) {
+    return this.listingsService.bulkDeleteUserListings(userId);
   }
 
   @Get('user/favorites')
@@ -77,9 +95,10 @@ export class ListingsController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Détail d\'une annonce' })
-  findOne(@Param('id') id: string) {
-    return this.listingsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.listingsService.findOne(id, user?.id);
   }
 
   @Post()

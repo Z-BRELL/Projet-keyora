@@ -5,11 +5,12 @@ import { useAuthStore } from '@/lib/store';
 import { useRequireAuth } from '@/lib/useRequireAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, MapPin, Filter } from 'lucide-react';
+import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, MapPin, Filter, Pencil } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { alertsApi } from '@/lib/api';
 import { formatDate, getApiError } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useTranslation } from '@/lib/i18n';
 
 const ListingMap = dynamic(
   () => import('@/components/map/ListingMap').then((m) => m.ListingMap),
@@ -19,7 +20,9 @@ const ListingMap = dynamic(
 export default function AlertsPage() {
   const { user, isMounted } = useRequireAuth();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
+  const [editingZone, setEditingZone] = useState<any>(null);
   const [drawnGeo, setDrawnGeo] = useState<any>(null);
   const [label, setLabel] = useState('');
   const [filters, setFilters] = useState({ type: '', minPrice: '', maxPrice: '' });
@@ -35,10 +38,18 @@ export default function AlertsPage() {
     mutationFn: (data: any) => alertsApi.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['alerts'] });
-      setShowForm(false);
-      setDrawnGeo(null);
-      setLabel('');
+      resetForm();
       toast.success('Zone d\'alerte créée !');
+    },
+    onError: (err: any) => toast.error(getApiError(err)),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => alertsApi.update(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['alerts'] });
+      resetForm();
+      toast.success('Zone d\'alerte mise à jour !');
     },
     onError: (err: any) => toast.error(getApiError(err)),
   });
@@ -56,18 +67,66 @@ export default function AlertsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts'] }),
   });
 
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingZone(null);
+    setDrawnGeo(null);
+    setLabel('');
+    setFilters({ type: '', minPrice: '', maxPrice: '' });
+  };
+
+  const handleEdit = (zone: any) => {
+    setEditingZone(zone);
+    setLabel(zone.label);
+    setFilters({
+      type: zone.filters?.type || '',
+      minPrice: zone.filters?.minPrice?.toString() || '',
+      maxPrice: zone.filters?.maxPrice?.toString() || '',
+    });
+    setShowForm(true);
+  };
+
   const handleSave = () => {
-    if (!label.trim()) { toast.error('Donnez un nom à votre zone'); return; }
-    if (!drawnGeo) { toast.error('Dessinez une zone sur la carte'); return; }
-    createMutation.mutate({
+    if (!label.trim()) {
+      toast.error(t('alerts.nameRequired'));
+      return;
+    }
+    if (!drawnGeo && !editingZone) {
+      toast.error(t('alerts.drawError'));
+      return;
+    }
+
+    const min = filters.minPrice ? parseFloat(filters.minPrice) : null;
+    const max = filters.maxPrice ? parseFloat(filters.maxPrice) : null;
+
+    if (min !== null && min < 0) {
+      toast.error(t('alerts.priceMinNegative'));
+      return;
+    }
+    if (max !== null && max < 0) {
+      toast.error(t('alerts.priceMaxNegative'));
+      return;
+    }
+    if (min !== null && max !== null && min >= max) {
+      toast.error(t('alerts.priceMinLessThanMax'));
+      return;
+    }
+
+    const payload = {
       label,
-      geoJson: drawnGeo,
+      ...(drawnGeo ? { geoJson: drawnGeo } : {}),
       filters: {
         type: filters.type || undefined,
         minPrice: filters.minPrice ? +filters.minPrice : undefined,
         maxPrice: filters.maxPrice ? +filters.maxPrice : undefined,
       },
-    });
+    };
+
+    if (editingZone) {
+      updateMutation.mutate({ id: editingZone.id, data: payload });
+    } else {
+      createMutation.mutate(payload);
+    }
   };
 
   if (!isMounted || !user) return null;
@@ -86,7 +145,7 @@ export default function AlertsPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => { resetForm(); setShowForm(true); }}
               className="btn-primary flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
@@ -94,12 +153,12 @@ export default function AlertsPage() {
             </button>
           </div>
 
-          {/* Formulaire création */}
+          {/* Formulaire création / édition */}
           {showForm && (
             <div className="card p-6 mb-6">
               <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary-500" />
-                Dessiner une nouvelle zone d'alerte
+                {editingZone ? 'Modifier la zone d\'alerte' : 'Dessiner une nouvelle zone d\'alerte'}
               </h2>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -135,6 +194,7 @@ export default function AlertsPage() {
                       <input
                         type="number"
                         placeholder="Prix min (FCFA)"
+                        min="0"
                         value={filters.minPrice}
                         onChange={(e) => setFilters((f) => ({ ...f, minPrice: e.target.value }))}
                         className="input text-sm"
@@ -142,6 +202,7 @@ export default function AlertsPage() {
                       <input
                         type="number"
                         placeholder="Prix max (FCFA)"
+                        min="0"
                         value={filters.maxPrice}
                         onChange={(e) => setFilters((f) => ({ ...f, maxPrice: e.target.value }))}
                         className="input text-sm"
@@ -149,29 +210,29 @@ export default function AlertsPage() {
                     </div>
                   </div>
 
-                  {drawnGeo ? (
+                  {drawnGeo || editingZone ? (
                     <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 flex items-center gap-2">
-                      ✅ Zone dessinée sur la carte
+                      ✅ {t('alerts.drawnSuccess')}
                     </div>
                   ) : (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
-                      👆 Utilisez l'outil polygone (carré) sur la carte pour dessiner votre zone
+                      👆 {t('alerts.drawInstruction')}
                     </div>
                   )}
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setShowForm(false)}
+                      onClick={resetForm}
                       className="flex-1 btn-outline text-sm"
                     >
                       Annuler
                     </button>
                     <button
                       onClick={handleSave}
-                      disabled={createMutation.isPending || !drawnGeo}
+                      disabled={createMutation.isPending || updateMutation.isPending}
                       className="flex-1 btn-primary text-sm"
                     >
-                      {createMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
+                      {createMutation.isPending || updateMutation.isPending ? 'Enregistrement…' : editingZone ? 'Mettre à jour' : 'Enregistrer'}
                     </button>
                   </div>
                 </div>
@@ -184,9 +245,10 @@ export default function AlertsPage() {
                     height="380px"
                     center={[3.8667, 11.5167]}
                   />
-                  <p className="text-xs text-gray-400 mt-2">
-                    Cliquez sur l'icône rectangle/polygone en haut à droite de la carte pour dessiner.
-                  </p>
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 flex items-start gap-2">
+                    <span className="text-blue-500 font-bold flex-shrink-0">ℹ️ {t('alerts.mapInfoTitle')}</span>
+                    <div>{t('alerts.mapInfoBody')}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -211,7 +273,7 @@ export default function AlertsPage() {
               <p className="text-gray-500 mb-6">
                 Créez votre première zone pour être notifié des nouveaux biens.
               </p>
-              <button onClick={() => setShowForm(true)} className="btn-primary">
+              <button onClick={() => { resetForm(); setShowForm(true); }} className="btn-primary">
                 <Plus className="w-4 h-4 mr-2 inline" /> Créer une alerte
               </button>
             </div>
@@ -241,6 +303,13 @@ export default function AlertsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleEdit(zone)}
+                      className="text-gray-400 hover:text-blue-600 transition-colors p-1"
+                      title="Modifier"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${zone.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {zone.active ? 'Active' : 'Inactive'}
                     </span>
@@ -254,7 +323,11 @@ export default function AlertsPage() {
                         : <ToggleLeft className="w-6 h-6" />}
                     </button>
                     <button
-                      onClick={() => deleteMutation.mutate(zone.id)}
+                      onClick={() => {
+                        if (window.confirm('Supprimer cette zone d\'alerte ?')) {
+                          deleteMutation.mutate(zone.id);
+                        }
+                      }}
                       className="text-gray-300 hover:text-red-500 transition-colors p-1"
                       title="Supprimer"
                     >

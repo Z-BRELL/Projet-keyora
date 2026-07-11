@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MessagesController } from './messages.controller';
 import { MessagesService } from './messages.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  // EventEmitter2 est déjà global (importé dans AppModule via EventEmitterModule.forRoot())
+  imports: [NotificationsModule],
   controllers: [MessagesController],
   providers: [MessagesService],
   exports: [MessagesService],

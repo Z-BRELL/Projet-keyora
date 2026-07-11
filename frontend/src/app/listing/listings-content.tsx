@@ -6,7 +6,7 @@ import { ListingCard } from '@/components/listing/ListingCard';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { listingsApi } from '@/lib/api';
-import { Search, Loader2, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Loader2, RotateCcw, ChevronLeft, ChevronRight, Building } from 'lucide-react';
 import Link from 'next/link';
 
 const ListingMap = dynamic(
@@ -17,6 +17,14 @@ const ListingMap = dynamic(
   }
 );
 
+const PROPERTY_TYPES = [
+  { value: '', label: 'Tous types' },
+  { value: 'HOUSE', label: 'Maison / Villa' },
+  { value: 'APARTMENT', label: 'Appartement' },
+  { value: 'LAND', label: 'Terrain' },
+  { value: 'COMMERCIAL', label: 'Local commercial' },
+];
+
 export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: string }) {
   const effectiveType = typeFromUrl || 'ALL';
 
@@ -24,6 +32,7 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
   const [searchQuery, setSearchQuery] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [propertyType, setPropertyType] = useState('');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -33,12 +42,13 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [activeTab, searchQuery, minPrice, maxPrice]);
+  }, [activeTab, searchQuery, minPrice, maxPrice, propertyType]);
 
   const apiParams: any = { page, limit: 12 };
   if (activeTab !== 'ALL') apiParams.type = activeTab;
   if (minPrice) apiParams.minPrice = parseInt(minPrice);
   if (maxPrice) apiParams.maxPrice = parseInt(maxPrice);
+  if (propertyType) apiParams.propertyType = propertyType;
   if (searchQuery.trim()) apiParams.search = searchQuery.trim();
 
   const { data, isLoading, isFetching } = useQuery({
@@ -56,10 +66,11 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
     setSearchQuery('');
     setMinPrice('');
     setMaxPrice('');
+    setPropertyType('');
     setActiveTab('ALL');
   };
 
-  const hasActiveFilters = searchQuery.trim() !== '' || minPrice !== '' || maxPrice !== '' || activeTab !== 'ALL';
+  const hasActiveFilters = searchQuery.trim() !== '' || minPrice !== '' || maxPrice !== '' || propertyType !== '' || activeTab !== 'ALL';
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -82,15 +93,27 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
               ))}
             </div>
 
-            {hasActiveFilters && (
-              <button
-                onClick={handleResetFilters}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-sm transition-colors"
+            <div className="flex items-center gap-2">
+              <select
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value)}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:ring-2 focus:ring-orange-500 outline-none"
               >
-                <RotateCcw className="w-4 h-4" />
-                Réinitialiser
-              </button>
-            )}
+                {PROPERTY_TYPES.map((pt) => (
+                  <option key={pt.value} value={pt.value}>{pt.label}</option>
+                ))}
+              </select>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-sm transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Réinitialiser
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-1 gap-2 w-full">

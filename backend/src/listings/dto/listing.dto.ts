@@ -99,7 +99,12 @@ export class CreateListingDto {
   longitude?: number;
 }
 
-export class UpdateListingDto extends PartialType(CreateListingDto) {}
+export class UpdateListingDto extends PartialType(CreateListingDto) {
+  @ApiProperty({ required: false, description: 'ID du nouveau propriétaire (SuperAdmin uniquement)' })
+  @IsString()
+  @IsOptional()
+  ownerId?: string;
+}
 
 export class ListingQueryDto {
   @ApiProperty({ required: false })

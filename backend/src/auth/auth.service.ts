@@ -33,8 +33,9 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(dto.password, 12);
     const verifyToken = uuidv4();
 
-    // DEV MODE: Auto-verify accounts for testing (remove in production)
-    const isDevelopment = process.env.NODE_ENV !== 'production';
+    // DEV MODE: Auto-verify accounts for testing unless REQUIRE_EMAIL_VERIFICATION is active
+    const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
+    const isDevelopment = process.env.NODE_ENV !== 'production' && !requireVerification;
     
     const user = await this.prisma.user.create({
       data: {
@@ -67,10 +68,11 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Email ou mot de passe incorrect');
 
-    // DEV MODE: Allow unverified accounts in development
-    const isDevelopment = process.env.NODE_ENV !== 'production';
+    // DEV MODE: Allow unverified accounts in development unless REQUIRE_EMAIL_VERIFICATION is active
+    const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
+    const isDevelopment = process.env.NODE_ENV !== 'production' && !requireVerification;
     if (!user.isVerified && !isDevelopment) {
-      throw new UnauthorizedException('Compte non vérifié. Vérifiez votre email.');
+      throw new UnauthorizedException('Compte non vérifié. Vérifiez votre e-mail.');
     }
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);
@@ -98,12 +100,53 @@ export class AuthService {
 
   async verifyEmail(token: string) {
     const user = await this.prisma.user.findFirst({ where: { verifyToken: token } });
-    if (!user) throw new BadRequestException('Token invalide ou expiré');
-    await this.prisma.user.update({
+    if (!user) throw new BadRequestException('Token de vérification invalide ou expiré');
+    
+    const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: { isVerified: true, verifyToken: null },
     });
-    return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' };
+
+    const tokens = await this.generateTokens(updatedUser.id, updatedUser.email, updatedUser.role);
+    const hashedRefresh = await bcrypt.hash(tokens.refreshToken, 10);
+    await this.prisma.user.update({
+      where: { id: updatedUser.id },
+      data: { refreshToken: hashedRefresh },
+    });
+
+    return {
+      message: 'Email vérifié avec succès. Connexion en cours...',
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        fullName: updatedUser.fullName,
+        role: updatedUser.role,
+      }
+    };
+  }
+
+  async resendVerification(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new BadRequestException('Aucun utilisateur trouvé avec cet email');
+    }
+    if (user.isVerified) {
+      throw new BadRequestException('Cet email est déjà vérifié');
+    }
+
+    const verifyToken = uuidv4();
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { verifyToken },
+    });
+
+    if (this.mail && this.mail.sendVerificationEmail) {
+      await this.mail.sendVerificationEmail(user.email, user.fullName, verifyToken);
+    }
+
+    return { message: 'E-mail de confirmation renvoyé avec succès.' };
   }
 
   async refreshTokens(userId: string, refreshToken: string) {

@@ -1,6 +1,7 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export interface NewMessageEvent {
   id: string;
@@ -19,6 +20,7 @@ export class MessagesService {
   constructor(
     private prisma: PrismaService,
     private events: EventEmitter2,
+    private notifications: NotificationsService,
   ) {}
 
   async send(senderId: string, dto: { recipientId: string; content?: string; listingId?: string; photoUrl?: string; photoCaption?: string }) {
@@ -48,6 +50,16 @@ export class MessagesService {
       sentAt: message.sentAt,
     };
     this.events.emit(`message.new.${dto.recipientId}`, event);
+    this.events.emit(`message.new.${senderId}`, event);
+
+    // Create real-time notification for recipient
+    await this.notifications.create(
+      dto.recipientId,
+      `Nouveau message de ${message.sender.fullName}`,
+      message.content || 'Vous avez reçu un nouveau message.',
+      'MESSAGE',
+      '/dashboard/messages',
+    ).catch(() => {}); // Catch silent failure to keep message sending robust
 
     return message;
   }

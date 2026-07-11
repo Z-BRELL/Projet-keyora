@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
-import { dashboardApi, moderationApi, usersApi, blogApi } from '@/lib/api';
+import { dashboardApi, moderationApi, usersApi, blogApi, supportApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useTranslation } from '@/lib/i18n';
-import { LayoutDashboard, ShieldCheck, Home, Users, BookOpen } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Home, Users, BookOpen, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { OverviewTab } from './components/OverviewTab';
@@ -15,12 +15,14 @@ import { ModerationTab } from './components/ModerationTab';
 import { ListingsTab } from './components/ListingsTab';
 import { UsersTab } from './components/UsersTab';
 import { BlogTab } from './components/BlogTab';
+import { SupportTab } from './components/SupportTab';
 
 const TABS = [
   { id: 'overview', labelKey: 'admin.overview', icon: LayoutDashboard },
   { id: 'moderation', labelKey: 'admin.moderation', icon: ShieldCheck },
   { id: 'listings', labelKey: 'admin.listings', icon: Home },
   { id: 'users', labelKey: 'admin.users', icon: Users },
+  { id: 'support', labelKey: 'admin.support', icon: HelpCircle },
   { id: 'blog', labelKey: 'admin.blog', icon: BookOpen },
 ] as const;
 
@@ -94,6 +96,13 @@ export default function SuperAdminDashboard() {
     queryFn: () => dashboardApi.adminUsers(),
     select: (r) => r.data,
     enabled: activeTab === 'users',
+  });
+
+  // Support Data
+  const { data: supportRequests = [], isLoading: loadingSupport } = useQuery({
+    queryKey: ['admin', 'support'],
+    queryFn: () => supportApi.getAll().then(r => r.data || []),
+    enabled: activeTab === 'support',
   });
 
   const changeRoleMutation = useMutation({
@@ -185,6 +194,12 @@ export default function SuperAdminDashboard() {
               usersData={usersData} 
               loadingUsers={loadingUsers} 
               changeRoleMutation={changeRoleMutation} 
+            />
+          )}
+          {activeTab === 'support' && (
+            <SupportTab 
+              supportRequests={supportRequests} 
+              loadingSupport={loadingSupport} 
             />
           )}
           {activeTab === 'blog' && (

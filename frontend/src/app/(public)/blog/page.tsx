@@ -9,10 +9,11 @@ import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BlogPage() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['blog', 'posts'],
     queryFn: () => blogApi.getPosts(1),
     select: (r) => r.data,
+    retry: 1,
   });
 
   const posts = data?.data || [];
@@ -30,6 +31,11 @@ export default function BlogPage() {
       <main className="flex-1 max-w-7xl mx-auto px-6 py-16 w-full">
         {isLoading ? (
           <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto" /></div>
+        ) : isError ? (
+          <div className="text-center py-20">
+            <p className="text-red-500 font-semibold mb-2">Erreur lors du chargement des articles</p>
+            <p className="text-sm text-gray-500">{(error as any)?.response?.data?.message || (error as any)?.message}</p>
+          </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-500">Aucun article pour le moment. Revenez bientôt !</p>

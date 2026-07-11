@@ -85,9 +85,33 @@ export class AuthController {
 
   @Get('verify-email')
   @ApiOperation({ summary: "Vérifier l'adresse email via le lien reçu" })
-  @ApiResponse({ status: 200, description: 'Email vérifié' })
-  verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
+  @ApiResponse({ status: 200, description: 'Email vérifié et connexion automatique' })
+  async verifyEmail(
+    @Query('token') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.verifyEmail(token);
+
+    if (result.accessToken && result.refreshToken) {
+      res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: 15 * 60 * 1000,
+      });
+      res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/api/auth',
+      });
+    }
+
+    return result;
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Renvoyer l'e-mail de confirmation" })
+  resendVerification(@Body('email') email: string) {
+    return this.authService.resendVerification(email);
   }
 
   @Post('refresh')

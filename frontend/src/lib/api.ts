@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from './store';
 import type {
   AuthTokens,
   LoginDto,
@@ -72,9 +73,7 @@ api.interceptors.response.use(
         }
         return api(originalRequest);
       } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        useAuthStore.getState().logout();
         
         // 👇 La magie anti-boucle : on ne redirige QUE si on n'est pas déjà sur l'accueil
         if (window.location.pathname !== '/') {
@@ -97,6 +96,8 @@ export const authApi = {
     api.get<AuthTokens['user']>('/auth/me'),
   refresh: (data?: Partial<RefreshTokenDto>) =>
     api.post<Pick<AuthTokens, 'accessToken' | 'refreshToken'>>('/auth/refresh', data ?? {}),
+  resendVerification: (email: string) =>
+    api.post<ApiMessage>('/auth/resend-verification', { email }),
 };
 
 export const listingsApi = {
@@ -122,6 +123,10 @@ export const listingsApi = {
     api.get<Favorite[]>('/listings/user/favorites'),
   getMyListings: () =>
     api.get<ListingSummary[]>('/listings/user/my-listings'),
+  getUserListingsForAdmin: (userId: string) =>
+    api.get<any[]>(`/listings/admin/user-listings/${userId}`),
+  bulkDeleteUserListings: (userId: string) =>
+    api.delete<ApiMessage>(`/listings/admin/bulk-delete/${userId}`),
 };
 
 export const searchApi = {
@@ -180,6 +185,17 @@ export const messagesApi = {
     api.post<ApiMessage>(`/messages/${contactId}/clear`),
 };
 
+export const notificationsApi = {
+  getAll: () =>
+    api.get<any[]>('/notifications'),
+  markAsRead: (id: string) =>
+    api.patch<any>(`/notifications/${id}/read`),
+  markAllAsRead: () =>
+    api.patch<any>('/notifications/read-all'),
+  delete: (id: string) =>
+    api.delete<any>(`/notifications/${id}`),
+};
+
 export const blogApi = {
   getPosts: (page = 1) =>
     api.get<PaginatedResponse<BlogPost>>('/blog/posts', { params: { page } }),
@@ -202,6 +218,21 @@ export const usersApi = {
     api.patch(`/users/${id}/role`, data),
   deleteUser: (id: string) =>
     api.delete<ApiMessage>(`/users/${id}`),
+  search: (q: string) =>
+    api.get<any[]>('/users/search', { params: { q } }),
+  adminUpdateProfile: (id: string, data: any) =>
+    api.patch(`/users/admin/profile/${id}`, data),
+  adminResetPassword: (id: string) =>
+    api.patch(`/users/admin/reset-password/${id}`),
+};
+
+export const supportApi = {
+  create: (data: { fullName: string; email: string; message: string }) =>
+    api.post('/support-requests', data),
+  getAll: () =>
+    api.get('/support-requests'),
+  resolve: (id: string) =>
+    api.patch(`/support-requests/${id}/resolve`),
 };
 
 export const dashboardApi = {

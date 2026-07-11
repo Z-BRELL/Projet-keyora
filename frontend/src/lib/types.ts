@@ -287,6 +287,7 @@ export interface BlogPost {
   excerpt?: string | null;
   content: string;
   coverUrl?: string | null;
+  category?: string | null;
   status: PostStatus;
   publishedAt?: string | null;
   authorId: string;

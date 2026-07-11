@@ -140,37 +140,45 @@ export class ListingsService {
     return result;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string) {
     // Cache individuel par annonce
     const cacheKey = `${CACHE_PREFIX}:one:${id}`;
-    const cached = await this.redis.get<ReturnType<typeof this.prisma.listing.findUnique>>(cacheKey);
-    if (cached) {
-      // Incrémenter les vues même sur hit cache (en arrière-plan, sans bloquer)
-      this.prisma.listing.update({
+    let listing = await this.redis.get<any>(cacheKey);
+    
+    if (!listing) {
+      listing = await this.prisma.listing.findUnique({
         where: { id },
-        data: { viewCount: { increment: 1 } },
-      }).catch(() => {});
-      return cached;
+        include: {
+          photos: { orderBy: { position: 'asc' } },
+          owner: { select: { id: true, fullName: true, avatarUrl: true, phone: true, email: true } },
+          _count: { select: { favorites: true } },
+        },
+      });
+      if (!listing) throw new NotFoundException('Annonce introuvable');
+
+      // Cache 5 minutes pour le détail (rarement modifié)
+      await this.redis.set(cacheKey, listing, 300);
     }
 
-    const listing = await this.prisma.listing.findUnique({
-      where: { id },
-      include: {
-        photos: { orderBy: { position: 'asc' } },
-        owner: { select: { id: true, fullName: true, avatarUrl: true, phone: true } },
-        _count: { select: { favorites: true } },
-      },
-    });
-    if (!listing) throw new NotFoundException('Annonce introuvable');
-
-    await this.prisma.listing.update({
+    // Incrémenter les vues même sur hit cache (en arrière-plan, sans bloquer)
+    this.prisma.listing.update({
       where: { id },
       data: { viewCount: { increment: 1 } },
-    });
+    }).catch(() => {});
 
-    // Cache 5 minutes pour le détail (rarement modifié)
-    await this.redis.set(cacheKey, listing, 300);
-    return listing;
+    // Ajouter le champ dynamique isFavorited
+    let isFavorited = false;
+    if (userId) {
+      const fav = await this.prisma.favorite.findUnique({
+        where: { userId_listingId: { userId, listingId: id } },
+      });
+      isFavorited = !!fav;
+    }
+
+    return {
+      ...listing,
+      isFavorited,
+    };
   }
 
   async update(id: string, dto: UpdateListingDto, userId: string, role: Role) {
@@ -190,10 +198,15 @@ export class ListingsService {
       }
     }
 
-    const updateData = { ...dto, latitude: lat, longitude: lng };
+    const newOwnerId = (role === Role.SUPERADMIN && dto.ownerId) ? dto.ownerId : undefined;
+
+    const updateData: any = { ...dto, latitude: lat, longitude: lng };
+    if (newOwnerId) {
+      updateData.ownerId = newOwnerId;
+    }
 
     let updated;
-    if (listing.status === ListingStatus.PUBLISHED) {
+    if (listing.status === ListingStatus.PUBLISHED && role !== Role.SUPERADMIN && role !== Role.MODERATOR) {
       updated = await this.prisma.listing.update({
         where: { id },
         data: { ...updateData, status: ListingStatus.PENDING },
@@ -315,5 +328,18 @@ export class ListingsService {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
+  }
+
+  async bulkDeleteUserListings(userId: string) {
+    const result = await this.prisma.listing.deleteMany({
+      where: { ownerId: userId },
+    });
+    
+    await Promise.all([
+      this.redis.invalidatePattern(`${CACHE_PREFIX}:one:*`),
+      this.redis.invalidatePattern(`${CACHE_PREFIX}:list:*`),
+    ]);
+    
+    return { message: `${result.count} annonces supprimées` };
   }
 }

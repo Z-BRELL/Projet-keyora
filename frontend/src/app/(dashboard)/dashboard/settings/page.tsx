@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -9,7 +9,7 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { useRequireAuth } from '@/lib/useRequireAuth';
-import { Loader2, Camera, Save, LogOut, Trash2, AlertCircle } from 'lucide-react';
+import { Loader2, LogOut, Trash2, AlertCircle, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -17,57 +17,19 @@ export default function SettingsPage() {
   const { user, isMounted } = useRequireAuth();
   const { logout } = useAuthStore();
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    avatarUrl: '',
-  });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['profile'],
-    queryFn: () => api.get('/users/profile').then((r) => r.data),
-    enabled: isMounted && !!user,
-  });
-
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        fullName: profile.fullName || '',
-        email: profile.email || '',
-        phone: profile.phone || '',
-        avatarUrl: profile.avatarUrl || '',
-      });
-    }
-  }, [profile]);
-
-  const updateProfileMutation = useMutation({
-    mutationFn: (data) => api.patch('/users/profile', data),
-    onSuccess: () => {
-      toast.success('Profile updated successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update profile');
-    },
-  });
 
   const deleteAccountMutation = useMutation({
     mutationFn: () => api.delete('/users/profile'),
     onSuccess: () => {
-      toast.success('Account deleted');
+      toast.success('Compte supprimé avec succès');
       logout();
       router.push('/');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete account');
+      toast.error(error.response?.data?.message || 'Erreur lors de la suppression du compte');
     },
   });
-
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    updateProfileMutation.mutate(formData as any);
-  };
 
   const handleLogout = () => {
     logout();
@@ -76,117 +38,56 @@ export default function SettingsPage() {
 
   if (!isMounted || !user) return null;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-2xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Account Settings</h1>
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-12 w-full">
+        <h1 className="text-3xl font-black text-gray-900 mb-8">Paramètres du compte</h1>
 
-        {/* Profile Settings */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Profile Information</h2>
-
-          <form onSubmit={handleSaveProfile} className="space-y-6">
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
+        {/* Profile Settings Redirect Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-orange-50 rounded-2xl text-orange-500">
+              <User className="w-6 h-6" />
             </div>
-
-            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Changing email will require verification
+              <h2 className="text-lg font-bold text-gray-900">Informations du profil</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Modifiez votre nom, email, téléphone et photo de profil.
               </p>
             </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
-            </div>
-
-            {/* Avatar URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Photo URL</label>
-              <input
-                type="url"
-                value={formData.avatarUrl}
-                onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                placeholder="https://..."
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={updateProfileMutation.isPending}
-              className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-            >
-              {updateProfileMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              Save Changes
-            </button>
-          </form>
+          </div>
+          <Link
+            href="/dashboard/profile"
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-center text-sm transition-all shadow-md shadow-orange-100 flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            Modifier mon profil
+          </Link>
         </div>
 
         {/* Security */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Security</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Sécurité</h2>
 
           <div className="space-y-4">
             <Link
               href="/dashboard/settings/change-password"
-              className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="block p-4 border border-gray-200 rounded-xl hover:bg-orange-50/30 hover:border-orange-200 transition-all"
             >
-              <p className="font-medium text-gray-900">Change Password</p>
-              <p className="text-sm text-gray-500 mt-1">Update your password</p>
+              <p className="font-semibold text-gray-900">Changer le mot de passe</p>
+              <p className="text-xs text-gray-400 mt-1">Mettre à jour votre mot de passe de connexion</p>
             </Link>
 
             <button
               onClick={handleLogout}
-              className="w-full p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left flex items-center justify-between group"
+              className="w-full p-4 border border-gray-200 rounded-xl hover:bg-orange-50/30 hover:border-orange-200 transition-all text-left flex items-center justify-between group"
             >
               <div>
-                <p className="font-medium text-gray-900">Sign Out</p>
-                <p className="text-sm text-gray-500 mt-1">Log out from this device</p>
+                <p className="font-semibold text-gray-900">Se déconnecter</p>
+                <p className="text-xs text-gray-400 mt-1">Déconnexion de cet appareil</p>
               </div>
-              <LogOut className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+              <LogOut className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
             </button>
           </div>
         </div>
@@ -196,9 +97,9 @@ export default function SettingsPage() {
           <div className="flex items-start gap-3 mb-4">
             <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h2 className="text-xl font-bold text-red-900">Danger Zone</h2>
+              <h2 className="text-xl font-bold text-red-950">Zone de danger</h2>
               <p className="text-sm text-red-700 mt-1">
-                Permanent actions that cannot be undone
+                Actions permanentes et irréversibles
               </p>
             </div>
           </div>
@@ -206,7 +107,7 @@ export default function SettingsPage() {
           {showDeleteConfirm ? (
             <div className="space-y-4">
               <p className="text-red-900 font-medium">
-                Are you sure? This will permanently delete your account and all associated data.
+                Êtes-vous sûr ? Cette action supprimera définitivement votre compte et toutes vos données associées.
               </p>
               <div className="flex gap-3">
                 <button
@@ -219,23 +120,23 @@ export default function SettingsPage() {
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
-                  Yes, Delete Account
+                  Oui, supprimer mon compte
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 bg-white border border-red-300 text-red-900 font-semibold py-2 rounded-lg hover:bg-red-50 transition-colors"
                 >
-                  Cancel
+                  Annuler
                 </button>
               </div>
             </div>
           ) : (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-full p-4 border-2 border-red-300 rounded-lg hover:bg-red-100 transition-colors text-left"
+              className="w-full p-4 border-2 border-red-200 hover:border-red-300 rounded-lg hover:bg-red-100/50 transition-colors text-left"
             >
-              <p className="font-medium text-red-900">Delete Account</p>
-              <p className="text-sm text-red-700 mt-1">Permanently delete your account</p>
+              <p className="font-semibold text-red-900">Supprimer mon compte</p>
+              <p className="text-xs text-red-700 mt-1">Supprimer définitivement votre compte Keyora</p>
             </button>
           )}
         </div>

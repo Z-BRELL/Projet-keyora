@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/profile.dto';
 import { Role } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -241,5 +242,70 @@ export class UsersService {
     }
     await this.prisma.user.delete({ where: { id: userId } });
     return { message: 'User deleted successfully' };
+  }
+
+  async adminResetPassword(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    
+    // Generate temporary password
+    const tempPassword = 'Keyora-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { 
+        passwordHash: hashedPassword,
+        verifyToken: null,
+        refreshToken: null, // logout user sessions
+      },
+    });
+
+    return { temporaryPassword: tempPassword };
+  }
+
+  async adminUpdateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (dto.email && dto.email !== user.email) {
+      const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      if (existing) throw new ForbiddenException('Email already in use');
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        fullName: dto.fullName || undefined,
+        phone: dto.phone !== undefined ? dto.phone : undefined,
+        email: dto.email || undefined,
+        avatarUrl: dto.avatarUrl || undefined,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phone: true,
+        role: true,
+      },
+    });
+  }
+
+  async searchUsers(query: string, currentUserId: string) {
+    if (!query || query.trim().length < 2) return [];
+    return this.prisma.user.findMany({
+      where: {
+        id: { not: currentUserId },
+        fullName: { contains: query, mode: 'insensitive' },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        role: true,
+      },
+      take: 10,
+    });
   }
 }

@@ -2,15 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useRef, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Menu, X, Home, Search, Bell, MessageSquare, User, LogOut, Shield, LayoutDashboard } from 'lucide-react';
 import { useAuthStore, useIsModerator } from '@/lib/store';
-import { authApi, messagesApi } from '@/lib/api';
+import { authApi, messagesApi, notificationsApi } from '@/lib/api';
 import { useMessageStream } from '@/lib/useMessageStream';
+import { useNotificationStream } from '@/lib/useNotificationStream';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 // Navigation links
 const navLinks = [
@@ -47,6 +50,164 @@ function MessageBadge() {
         </span>
       )}
     </Link>
+  );
+}
+
+function NotificationBadge() {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+
+  const { data: notifications = [], refetch } = useQuery<any[]>({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      try {
+        const response = await notificationsApi.getAll();
+        return Array.isArray(response.data) ? response.data : response.data || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  useNotificationStream({
+    showToast: true,
+    onNotification: () => {
+      refetch();
+    },
+  });
+
+  const markReadMutation = useMutation({
+    mutationFn: (id: string) => notificationsApi.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const markAllReadMutation = useMutation({
+    mutationFn: () => notificationsApi.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => notificationsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const unreadCount = notifications.filter((n: any) => !n.read).length;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="btn-ghost p-2 relative hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
+      >
+        <Bell className="w-5 h-5 text-gray-700 hover:text-orange-500 transition-colors" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1.5 right-1.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <h3 className="font-bold text-sm text-gray-800">Notifications</h3>
+            {unreadCount > 0 && (
+              <button 
+                onClick={() => markAllReadMutation.mutate()} 
+                className="text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors"
+              >
+                Tout lire
+              </button>
+            )}
+          </div>
+
+          <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+            {notifications.length === 0 ? (
+              <div className="p-8 text-center text-gray-400 text-xs">
+                Aucune notification pour le moment.
+              </div>
+            ) : (
+              notifications.map((n: any) => {
+                let icon = '🔔';
+                let iconBg = 'bg-orange-50 text-orange-500';
+                if (n.type === 'MESSAGE') {
+                  icon = '💬';
+                  iconBg = 'bg-blue-50 text-blue-500';
+                } else if (n.type === 'MODERATION') {
+                  icon = '🛡️';
+                  iconBg = 'bg-red-50 text-red-500';
+                } else if (n.type === 'ALERT') {
+                  icon = '📍';
+                  iconBg = 'bg-emerald-50 text-emerald-500';
+                }
+
+                return (
+                  <div 
+                    key={n.id} 
+                    className={`p-4 flex gap-3 transition-colors hover:bg-gray-50 relative group ${!n.read ? 'bg-orange-50/20' : ''}`}
+                  >
+                    <div className={`w-8 h-8 rounded-full ${iconBg} flex items-center justify-center text-sm flex-shrink-0`}>
+                      {icon}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <div className="flex justify-between items-baseline mb-0.5">
+                        <span className={`text-xs font-semibold text-gray-800 truncate ${!n.read ? 'font-bold' : ''}`}>
+                          {n.title}
+                        </span>
+                        <span className="text-[10px] text-gray-400 flex-shrink-0">
+                          {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: fr })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-normal mb-1 break-words">
+                        {n.content}
+                      </p>
+                      {n.link && (
+                        <Link 
+                          href={n.link} 
+                          onClick={() => {
+                            if (!n.read) markReadMutation.mutate(n.id);
+                            setIsOpen(false);
+                          }}
+                          className="text-[10px] text-orange-500 hover:text-orange-600 font-bold transition-colors inline-flex items-center gap-0.5"
+                        >
+                          Voir les détails →
+                        </Link>
+                      )}
+                    </div>
+                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => deleteMutation.mutate(n.id)}
+                        className="text-gray-400 hover:text-red-500 text-xs p-1 rounded hover:bg-gray-100"
+                        title="Supprimer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -93,7 +254,7 @@ export function Navbar() {
             </Link>
 
             {/* Nav Desktop */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
@@ -111,7 +272,7 @@ export function Navbar() {
             </div>
 
             {/* Actions Desktop */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               {user ? (
                 <>
                   {isModerator && (
@@ -129,14 +290,29 @@ export function Navbar() {
                   )}
                   
                   <MessageBadge />
+                  <NotificationBadge />
                   
-                  <Link href="/dashboard" className="btn-ghost flex items-center gap-1.5">
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span className="text-sm">{user.fullName.split(' ')[0]}</span>
-                  </Link>
-                  <button onClick={handleLogout} className="btn-ghost p-2 text-gray-400 hover:text-red-500">
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                  <div className="relative group">
+                    <button className="btn-ghost flex items-center gap-1.5 focus:outline-none py-2 px-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-primary-600 transition-colors">
+                      <User className="w-4 h-4" />
+                      <span className="text-sm font-semibold">{user.fullName.split(' ')[0]}</span>
+                    </button>
+                    <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 hidden group-hover:block hover:block z-50">
+                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                        Tableau de bord
+                      </Link>
+                      <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                        Mon Profil
+                      </Link>
+                      <Link href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                        Paramètres
+                      </Link>
+                      <hr className="my-1 border-gray-100" />
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
+                        <LogOut className="w-4 h-4" /> Se déconnecter
+                      </button>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
@@ -152,7 +328,7 @@ export function Navbar() {
 
             {/* Mobile toggle */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -162,7 +338,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
+          <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
@@ -193,6 +369,12 @@ export function Navbar() {
                   )}
                   <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="btn-outline text-center text-sm">
                     Tableau de bord
+                  </Link>
+                  <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)} className="btn-outline text-center text-sm">
+                    Mon Profil
+                  </Link>
+                  <Link href="/dashboard/settings" onClick={() => setMobileOpen(false)} className="btn-outline text-center text-sm">
+                    Paramètres
                   </Link>
                   <button onClick={handleLogout} className="btn-ghost text-sm text-red-500">
                     Déconnexion

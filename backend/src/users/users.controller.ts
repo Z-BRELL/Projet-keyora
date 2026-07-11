@@ -1,4 +1,5 @@
-import { Controller, Get, Patch, Delete, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Body, Param, UseGuards, ForbiddenException, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { JwtAuthGuard } from '../common/guards';
@@ -26,6 +27,14 @@ export class UsersController {
     return this.usersService.getProfile(user.id);
   }
 
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Search users by name to start a conversation' })
+  searchUsers(@Query('q') q: string, @CurrentUser() user: any) {
+    return this.usersService.searchUsers(q, user.id);
+  }
+
   @Get('profile/:userId')
   @ApiOperation({ summary: 'Get public user profile' })
   getPublicProfile(@Param('userId') userId: string) {
@@ -44,8 +53,26 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete account' })
-  deleteAccount(@CurrentUser() user: any) {
-    return this.usersService.deleteAccount(user.id);
+  async deleteAccount(
+    @CurrentUser() user: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.usersService.deleteAccount(user.id);
+    
+    // Efface les cookies de session
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/auth',
+    });
+    
+    return result;
   }
 
   @Get('stats/seller/:sellerId')
@@ -89,5 +116,34 @@ export class UsersController {
       throw new ForbiddenException('Only super admins can delete users');
     }
     return this.usersService.deleteUser(id);
+  }
+
+  @Patch('admin/profile/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user profile (superadmin only)' })
+  adminUpdateProfile(
+    @Param('id') id: string,
+    @Body() dto: UpdateProfileDto,
+    @CurrentUser() user: any,
+  ) {
+    if (user.role !== 'SUPERADMIN') {
+      throw new ForbiddenException('Only super admins can update other user profiles');
+    }
+    return this.usersService.adminUpdateProfile(id, dto);
+  }
+
+  @Patch('admin/reset-password/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reset user password (superadmin only)' })
+  adminResetPassword(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    if (user.role !== 'SUPERADMIN') {
+      throw new ForbiddenException('Only super admins can reset user passwords');
+    }
+    return this.usersService.adminResetPassword(id);
   }
 }

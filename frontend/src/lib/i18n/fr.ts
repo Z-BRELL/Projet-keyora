@@ -29,6 +29,15 @@ export const fr = {
     inactive: 'Inactive',
     toggleActive: 'Activer / Désactiver',
     deleteConfirm: 'Voulez-vous vraiment supprimer cette alerte ?',
+    drawError: 'Dessinez une zone sur la carte',
+    nameRequired: 'Donnez un nom à votre zone',
+    priceMinNegative: 'Le prix minimum ne peut pas être négatif',
+    priceMaxNegative: 'Le prix maximum ne peut pas être négatif',
+    priceMinLessThanMax: 'Le prix minimum doit être inférieur au prix maximum',
+    drawnSuccess: 'Zone dessinée sur la carte',
+    drawInstruction: 'Utilisez l\'outil polygone (carré) sur la carte pour dessiner votre zone',
+    mapInfoTitle: 'Info dessin :',
+    mapInfoBody: 'Cliquez sur l\'icône de polygone ou de rectangle dans la barre d\'outils de la carte (en haut à droite), puis tracez votre zone en cliquant sur la carte. Cliquez sur le premier point pour fermer le polygone.',
   },
   listings: {
     price: 'Prix',
@@ -43,6 +52,7 @@ export const fr = {
     moderation: 'Modération',
     listings: 'Annonces',
     users: 'Utilisateurs',
+    support: 'Support',
     blog: 'Blog',
     stats: {
       users: 'Utilisateurs',
