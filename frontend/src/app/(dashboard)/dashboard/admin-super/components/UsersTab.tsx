@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { RoleBadge } from '@/components/shared/RoleBadge';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Users, Search, Loader2, Trash2, Pencil, X, Home } from 'lucide-react';
 import { usersApi, listingsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -272,7 +273,7 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
                         <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-500">
                           <span className="font-semibold text-gray-900">{formatPrice(l.price)}</span>
                           <span>📍 {l.city || '—'}</span>
-                          <span className="inline-flex scale-90"><RoleBadge role={l.status === 'PUBLISHED' ? 'SELLER' : 'BUYER'} label={l.status} /></span>
+                          <span className="inline-flex scale-90"><StatusBadge status={l.status} /></span>
                         </div>
                       </div>
                       <button onClick={() => handleDeleteSingleListing(l.id)} className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded transition-colors" title="Supprimer cette annonce">

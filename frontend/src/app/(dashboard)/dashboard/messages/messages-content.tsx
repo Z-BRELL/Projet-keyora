@@ -8,16 +8,18 @@ import { useAuthStore } from '@/lib/store';
 import { useMessageStream } from '@/lib/useMessageStream';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Loader2, Search, SquarePen, Home, Phone, Info, CheckCheck, Paperclip, Camera, Send, ExternalLink, Calendar, Bed, Bath, Maximize2, Waves, X, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Loader2, Search, SquarePen, Home, Phone, Info, CheckCheck, Paperclip, Camera, Send, ExternalLink, Calendar, Bed, Bath, Maximize2, Waves, X, User as UserIcon, MessageSquare, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { useRequireAuth } from '@/lib/useRequireAuth';
+import { useTranslation } from '@/lib/i18n';
 
 export default function MessagesPageContent() {
   const { user, isMounted } = useRequireAuth();
   const qc = useQueryClient();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -192,9 +194,9 @@ export default function MessagesPageContent() {
       <main className="flex-grow flex w-full max-w-7xl mx-auto pt-lg pb-xl px-4 sm:px-6 lg:px-8 gap-gutter overflow-hidden h-[calc(100vh-80px)]">
         
         {/* Left Column: Conversation List */}
-        <aside className="w-full md:w-1/3 lg:w-1/4 bg-surface-container-lowest rounded-xl border border-outline-variant flex-col overflow-hidden hidden md:flex h-full shadow-sm">
+        <aside className={`w-full md:w-1/3 lg:w-1/4 bg-surface-container-lowest rounded-xl border border-outline-variant flex-col overflow-hidden h-full shadow-sm ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
-            <h2 className="font-headline-md text-headline-md text-on-surface">Messages</h2>
+            <h2 className="font-headline-md text-headline-md text-on-surface">{t('messages.title')}</h2>
             <button className="text-on-surface-variant hover:text-primary transition-colors">
               <SquarePen className="w-5 h-5" />
             </button>
@@ -204,7 +206,7 @@ export default function MessagesPageContent() {
               <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-outline" />
               <input 
                 className="w-full bg-surface pl-10 pr-sm py-2 rounded-lg border border-outline-variant text-body-md font-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all shadow-inner" 
-                placeholder="Search messages..." 
+                placeholder={t('messages.searchPlaceholder')}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -264,14 +266,14 @@ export default function MessagesPageContent() {
                 {searchQuery.trim().length >= 2 && (
                   <div>
                     <div className="px-md py-2 bg-orange-50/50 text-xs font-bold text-orange-600 uppercase tracking-wider border-b border-outline-variant">
-                      Utilisateurs sur Keyora
+                      {t('messages.userHeader')}
                     </div>
                     {loadingSearch ? (
                       <div className="flex justify-center p-4">
                         <Loader2 className="w-5 h-5 animate-spin text-secondary" />
                       </div>
                     ) : searchResults.filter((u: any) => !conversations.some((c: any) => c.contactId === u.id)).length === 0 ? (
-                      <p className="p-4 text-center text-xs text-on-surface-variant">Aucun autre utilisateur trouvé.</p>
+                      <p className="p-4 text-center text-xs text-on-surface-variant">{t('messages.noUsers')}</p>
                     ) : (
                       searchResults
                         .filter((u: any) => !conversations.some((c: any) => c.contactId === u.id))
@@ -301,7 +303,7 @@ export default function MessagesPageContent() {
                                     {u.fullName}
                                   </h3>
                                   <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-semibold uppercase">
-                                    {u.role === 'BUYER' ? 'Acheteur' : u.role === 'SELLER' ? 'Vendeur' : u.role}
+                                    {u.role === 'BUYER' ? t('admin.roles.buyer') : u.role === 'SELLER' ? t('admin.roles.seller') : u.role}
                                   </span>
                                 </div>
                               </div>
@@ -313,7 +315,7 @@ export default function MessagesPageContent() {
                 )}
 
                 {filteredConversations.length === 0 && searchQuery.trim().length < 2 && (
-                  <p className="p-6 text-center text-sm text-on-surface-variant">Aucune conversation.</p>
+                  <p className="p-6 text-center text-sm text-on-surface-variant">{t('messages.noConversations')}</p>
                 )}
               </>
             )}
@@ -321,12 +323,12 @@ export default function MessagesPageContent() {
         </aside>
 
         {/* Center Column: Chat Thread */}
-        <section className="flex-grow flex flex-col bg-surface-container-lowest rounded-xl shadow-[0_4px_15px_-3px_rgba(3,8,19,0.04)] border border-outline-variant overflow-hidden h-full relative z-10">
+        <section className={`flex-grow flex flex-col bg-surface-container-lowest rounded-xl shadow-[0_4px_15px_-3px_rgba(3,8,19,0.04)] border border-outline-variant overflow-hidden h-full relative z-10 ${selectedChat ? 'flex' : 'hidden md:flex'}`}>
           {!selectedChat ? (
             <div className="flex-1 flex items-center justify-center text-on-surface-variant bg-surface-bright">
               <div className="text-center">
                 <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Sélectionnez une conversation</p>
+                <p>{t('messages.selectConversation')}</p>
               </div>
             </div>
           ) : (
@@ -334,6 +336,13 @@ export default function MessagesPageContent() {
               {/* Chat Header */}
               <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
                 <div className="flex items-center gap-md">
+                  <button 
+                    onClick={() => setSelectedChat(null)}
+                    className="p-2 hover:bg-surface-container rounded-full transition-colors md:hidden text-on-surface-variant mr-1"
+                    title={t('common.cancel')}
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
                   {selectedConversation?.avatarUrl ? (
                     <img src={selectedConversation.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
                   ) : (
@@ -344,7 +353,7 @@ export default function MessagesPageContent() {
                   <div>
                     <h2 className="font-label-md text-label-md text-on-surface">{selectedConversation?.contactName || 'Contact'}</h2>
                     <p className="font-label-sm text-label-sm text-green-600 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span> Online
+                      <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span> {t('messages.online')}
                     </p>
                   </div>
                 </div>
@@ -365,11 +374,11 @@ export default function MessagesPageContent() {
                     <Loader2 className="w-6 h-6 animate-spin text-secondary" />
                   </div>
                 ) : chatHistory.length === 0 ? (
-                  <p className="text-center text-on-surface-variant font-body-sm mt-4">Aucun message</p>
+                  <p className="text-center text-on-surface-variant font-body-sm mt-4">{t('messages.noMessages')}</p>
                 ) : (
                   <>
                     <div className="text-center font-label-sm text-label-sm text-on-surface-variant my-sm">
-                      Historique
+                      {t('messages.history')}
                     </div>
                     {chatHistory.map((msg: any) => {
                       const isMe = msg.senderId === user?.id;
@@ -443,7 +452,7 @@ export default function MessagesPageContent() {
                   <input 
                     ref={inputRef}
                     className="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant py-2 px-sm focus:outline-none" 
-                    placeholder="Tapez un message..." 
+                    placeholder={t('messages.inputPlaceholder')}
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
@@ -466,7 +475,7 @@ export default function MessagesPageContent() {
         {activeListing ? (
           <aside className="w-80 bg-surface-container-lowest rounded-xl border border-outline-variant hidden lg:flex flex-col h-full overflow-y-auto shadow-sm">
             <div className="p-md border-b border-outline-variant bg-surface-bright sticky top-0 z-10">
-              <h3 className="font-label-md text-label-md text-on-surface">À propos du bien</h3>
+              <h3 className="font-label-md text-label-md text-on-surface">{t('messages.aboutProperty')}</h3>
             </div>
             <div className="p-md">
               <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-md border border-outline-variant shadow-sm bg-gray-100 flex items-center justify-center">
@@ -508,11 +517,11 @@ export default function MessagesPageContent() {
               <div className="border-t border-outline-variant pt-md">
                 <Link href={`/listings/${activeListing.id}`} className="w-full py-2 px-4 border border-primary text-primary font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors mb-sm flex justify-center items-center gap-sm">
                   <ExternalLink className="w-4 h-4" />
-                  Voir l'annonce
+                  {t('messages.viewListing')}
                 </Link>
                 <button className="w-full py-2 px-4 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary-container transition-colors flex justify-center items-center gap-sm shadow-[0_8px_30px_-4px_rgba(3,8,19,0.08)]">
                   <Calendar className="w-4 h-4" />
-                  Planifier une visite
+                  {t('messages.scheduleVisit')}
                 </button>
               </div>
             </div>
@@ -527,7 +536,7 @@ export default function MessagesPageContent() {
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h3 className="font-bold text-gray-900">Image jointe</h3>
+              <h3 className="font-bold text-gray-900">{t('messages.attachmentTitle')}</h3>
               <button onClick={() => setShowPropertyModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>

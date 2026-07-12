@@ -115,6 +115,22 @@ export const fr = {
       reasonPlaceholder: 'Indiquez la raison du refus...',
       confirmReject: 'Confirmer le refus',
     }
+  },
+  messages: {
+    title: 'Messages',
+    searchPlaceholder: 'Rechercher une conversation...',
+    userHeader: 'Utilisateurs sur Keyora',
+    noUsers: 'Aucun autre utilisateur trouvé.',
+    noConversations: 'Aucune conversation.',
+    selectConversation: 'Sélectionnez une conversation pour commencer à discuter',
+    online: 'En ligne',
+    history: 'Historique des messages',
+    noMessages: 'Aucun message dans cette discussion',
+    inputPlaceholder: 'Tapez votre message ici...',
+    aboutProperty: 'À propos du bien',
+    viewListing: 'Voir l\'annonce',
+    scheduleVisit: 'Planifier une visite',
+    attachmentTitle: 'Image jointe',
   }
 };
 
