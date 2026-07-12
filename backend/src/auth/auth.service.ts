@@ -50,7 +50,10 @@ export class AuthService {
     });
 
     if (this.mail && this.mail.sendVerificationEmail && !isDevelopment) {
-      await this.mail.sendVerificationEmail(user.email, user.fullName, verifyToken);
+      // FIRE AND FORGET: On n'attend pas la réponse de Brevo pour répondre à l'utilisateur
+      this.mail.sendVerificationEmail(user.email, user.fullName, verifyToken).catch((e) => {
+        console.error('Erreur silencieuse envoi email:', e);
+      });
     }
 
     return { 
@@ -143,7 +146,10 @@ export class AuthService {
     });
 
     if (this.mail && this.mail.sendVerificationEmail) {
-      await this.mail.sendVerificationEmail(user.email, user.fullName, verifyToken);
+      // FIRE AND FORGET
+      this.mail.sendVerificationEmail(user.email, user.fullName, verifyToken).catch((e) => {
+        console.error('Erreur silencieuse renvoi email:', e);
+      });
     }
 
     return { message: 'E-mail de confirmation renvoyé avec succès.' };
