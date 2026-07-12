@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useAuthStore } from './store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -53,7 +54,8 @@ export function useMessageStream(options: UseMessageStreamOptions = {}) {
       esRef.current.close();
     }
 
-    const url = `${API_URL}/api/messages/stream`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const url = `${API_URL}/api/messages/stream${token ? `?token=${token}` : ''}`;
     // withCredentials = true pour envoyer les cookies HttpOnly
     const es = new EventSource(url, { withCredentials: true });
     esRef.current = es;

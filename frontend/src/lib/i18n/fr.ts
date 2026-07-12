@@ -45,6 +45,9 @@ export const fr = {
     rooms: 'Pièces',
     viewDetails: 'Voir l\'annonce',
     otherFromSeller: 'Autres biens de ce vendeur',
+    noListingsTitle: 'Aucune annonce trouvée',
+    noListingsDesc: 'Essayez de modifier vos filtres ou revenez plus tard.',
+    resetFilters: 'Réinitialiser les filtres',
   },
   admin: {
     title: 'Administration',

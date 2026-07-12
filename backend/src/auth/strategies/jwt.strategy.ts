@@ -18,6 +18,11 @@ function extractJwtFromCookieOrHeader(req: Request): string | null {
   if (req?.cookies?.accessToken) {
     return req.cookies.accessToken as string;
   }
+  // Priorité 3 : paramètre de requête (SSE / EventSource)
+  const tokenQuery = req?.query?.token;
+  if (typeof tokenQuery === 'string') {
+    return tokenQuery;
+  }
   return null;
 }
 

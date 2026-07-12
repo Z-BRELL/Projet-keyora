@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { listingsApi } from '@/lib/api';
 import { Search, Loader2, RotateCcw, ChevronLeft, ChevronRight, Building } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 const ListingMap = dynamic(
   () => import('@/components/map/ListingMap').then((mod) => mod.ListingMap),
@@ -26,6 +27,7 @@ const PROPERTY_TYPES = [
 ];
 
 export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: string }) {
+  const { t } = useTranslation();
   const effectiveType = typeFromUrl || 'ALL';
 
   const [activeTab, setActiveTab] = useState(effectiveType);
@@ -149,10 +151,12 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
 
       <div className="flex-1 flex overflow-hidden h-[calc(100vh-180px)]">
         <div className="w-full lg:w-1/2 xl:w-7/12 overflow-y-auto p-4 sm:p-6 pb-24">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Biens disponibles</h1>
-            <span className="text-gray-500 font-medium">{meta?.total || 0} résultats</span>
-          </div>
+          {!isLoading && (
+            <div className="mb-6 flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-900">Biens disponibles</h1>
+              <span className="text-gray-500 font-medium">{meta?.total || 0} résultats</span>
+            </div>
+          )}
 
           {isLoading ? (
             <div className="flex flex-col justify-center items-center h-64 gap-3">
@@ -164,14 +168,14 @@ export default function ListingsPageContent({ typeFromUrl }: { typeFromUrl?: str
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Aucune annonce trouvée</h3>
-              <p className="text-gray-500">Essayez de modifier vos filtres ou revenez plus tard.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{t('listings.noListingsTitle')}</h3>
+              <p className="text-gray-500">{t('listings.noListingsDesc')}</p>
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
                   className="mt-4 px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
                 >
-                  Réinitialiser les filtres
+                  {t('listings.resetFilters')}
                 </button>
               )}
             </div>

@@ -8,26 +8,26 @@ function getBlogs(superAdminId: string) {
     {
       title: "Comment bien investir dans l'immobilier au Cameroun",
       slug: 'comment-bien-investir-immobilier',
-      excerpt: "Le march\u00e9 immobilier camerounais conna\u00eet une croissance fulgurante. D\u00e9couvrez les cl\u00e9s pour r\u00e9aliser un investissement rentable.",
+      excerpt: "Le marché immobilier camerounais connaît une croissance fulgurante. Découvrez les clés pour réaliser un investissement rentable.",
       content: [
-        "Le march\u00e9 immobilier camerounais offre de nombreuses opportunit\u00e9s pour les investisseurs avertis. Voici les points essentiels \u00e0 consid\u00e9rer :",
+        "Le marché immobilier camerounais offre de nombreuses opportunités pour les investisseurs avertis. Voici les points essentiels à considérer :",
         "",
         "1. Choisir le bon emplacement",
-        "Les quartiers en plein d\u00e9veloppement comme Bastos \u00e0 Yaound\u00e9 ou Bonanjo \u00e0 Douala offrent le meilleur potentiel de plus-value. Privil\u00e9giez les zones b\u00e9n\u00e9ficiant de nouvelles infrastructures (routes, \u00e9coles, centres commerciaux).",
+        "Les quartiers en plein développement comme Bastos à Yaoundé ou Bonanjo à Douala offrent le meilleur potentiel de plus-value. Privilégiez les zones bénéficiant de nouvelles infrastructures (routes, écoles, centres commerciaux).",
         "",
-        "2. S\u00e9curiser le foncier",
-        "Avant tout achat, v\u00e9rifiez le titre foncier aupr\u00e8s du Conservatoire Foncier. Un titre foncier en r\u00e8gle est la garantie d'un investissement serein. M\u00e9fiez-vous des promesses de vente non authentifi\u00e9es.",
+        "2. Sécuriser le foncier",
+        "Avant tout achat, vérifiez le titre foncier auprès du Conservatoire Foncier. Un titre foncier en règle est la garantie d'un investissement serein. Méfiez-vous des promesses de vente non authentifiées.",
         "",
         "3. Financer son projet",
-        "Les banques camerounaises proposent des cr\u00e9dits immobiliers \u00e0 des taux comp\u00e9titifs (autour de 8-10% sur 15-20 ans). La Microfinance peut \u00eatre une alternative pour les petits projets.",
+        "Les banques camerounaises proposent des crédits immobiliers à des taux compétitifs (autour de 8-10% sur 15-20 ans). La Microfinance peut être une alternative pour les petits projets.",
         "",
-        "4. Rentabilit\u00e9 locative",
-        "Un bien bien situ\u00e9 \u00e0 Yaound\u00e9 ou Douala peut g\u00e9n\u00e9rer un rendement locatif de 6 \u00e0 10% par an. Les studios et les appartements 2 pi\u00e8ces sont les plus demand\u00e9s.",
+        "4. Rentabilité locative",
+        "Un bien bien situé à Yaoundé ou Douala peut générer un rendement locatif de 6 à 10% par an. Les studios et les appartements 2 pièces sont les plus demandés.",
         "",
-        "5. Faire appel \u00e0 un professionnel",
-        "Un agent immobilier certifi\u00e9 vous accompagne dans toutes les \u00e9tapes : recherche, visite, n\u00e9gociation et signature. Son expertise vous fait gagner du temps et de l'argent.",
+        "5. Faire appel à un professionnel",
+        "Un agent immobilier certifié vous accompagne dans toutes les étapes : recherche, visite, négociation et signature. Son expertise vous fait gagner du temps et de l'argent.",
         "",
-        "Investir dans l'immobilier au Cameroun est une d\u00e9cision judicieuse \u00e0 condition de bien se pr\u00e9parer. Keyora est l\u00e0 pour vous accompagner \u00e0 chaque \u00e9tape de votre projet.",
+        "Investir dans l'immobilier au Cameroun est une décision judicieuse à condition de bien se préparer. Keyora est là pour vous accompagner à chaque étape de votre projet.",
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop',
       category: 'Investissement',
@@ -37,28 +37,28 @@ function getBlogs(superAdminId: string) {
       authorId: superAdminId,
     },
     {
-      title: 'Guide complet pour acheter votre premi\u00e8re maison',
+      title: 'Guide complet pour acheter votre première maison',
       slug: 'guide-complet-acheter-premiere-maison',
-      excerpt: 'Vous souhaitez devenir propri\u00e9taire pour la premi\u00e8re fois ? Suivez notre guide pas \u00e0 pas pour r\u00e9ussir votre achat.',
+      excerpt: 'Vous souhaitez devenir propriétaire pour la première fois ? Suivez notre guide pas à pas pour réussir votre achat.',
       content: [
-        'Devenir propri\u00e9taire est un r\u00eave accessible. Voici un guide complet pour acheter votre premi\u00e8re maison au Cameroun :',
+        'Devenir propriétaire est un rêve accessible. Voici un guide complet pour acheter votre première maison au Cameroun :',
         '',
-        '\u00c9tape 1 : D\u00e9finir votre budget',
-        "Calculez votre capacit\u00e9 d'emprunt : vos mensualit\u00e9s ne doivent pas d\u00e9passer 35% de vos revenus mensuels. Pr\u00e9voyez un apport personnel d'au moins 20% du prix du bien.",
+        'Étape 1 : Définir votre budget',
+        "Calculez votre capacité d'emprunt : vos mensualités ne doivent pas dépasser 35% de vos revenus mensuels. Prévoyez un apport personnel d'au moins 20% du prix du bien.",
         '',
-        '\u00c9tape 2 : Rechercher le bien id\u00e9al',
-        'Utilisez Keyora pour trouver des annonces correspondant \u00e0 vos crit\u00e8res. Filtrez par ville, quartier, type de bien et budget. Consultez les photos et les descriptions d\u00e9taill\u00e9es.',
+        'Étape 2 : Rechercher le bien idéal',
+        'Utilisez Keyora pour trouver des annonces correspondant à vos critères. Filtrez par ville, quartier, type de bien et budget. Consultez les photos et les descriptions détaillées.',
         '',
-        '\u00c9tape 3 : Visiter et inspecter',
-        "Ne vous fiez pas uniquement aux photos. Visitez toujours le bien en personne, v\u00e9rifiez l'\u00e9tat g\u00e9n\u00e9ral, la plomberie, l'\u00e9lectricit\u00e9 et l'absence d'humidit\u00e9.",
+        'Étape 3 : Visiter et inspecter',
+        "Ne vous fiez pas uniquement aux photos. Visitez toujours le bien en personne, vérifiez l'état général, la plomberie, l'électricité et l'absence d'humidité.",
         '',
-        '\u00c9tape 4 : N\u00e9gocier le prix',
-        "Le prix affich\u00e9 n'est pas toujours ferme. Pr\u00e9parez vos arguments : \u00e9tat du march\u00e9, travaux n\u00e9cessaires, comparaison avec des biens similaires.",
+        'Étape 4 : Négocier le prix',
+        "Le prix affiché n'est pas toujours ferme. Préparez vos arguments : état du marché, travaux nécessaires, comparaison avec des biens similaires.",
         '',
-        '\u00c9tape 5 : Signer l\u2019acte de vente',
-        "Faites appel \u00e0 un notaire pour authentifier la vente. V\u00e9rifiez que le titre foncier est bien au nom du vendeur et qu'il n'y a pas d'hypoth\u00e8que.",
+        'Étape 5 : Signer l’acte de vente',
+        "Faites appel à un notaire pour authentifier la vente. Vérifiez que le titre foncier est bien au nom du vendeur et qu'il n'y a pas d'hypothèque.",
         '',
-        "Avec Keyora, trouvez la maison de vos r\u00eaves et r\u00e9alisez votre projet d'achat en toute s\u00e9r\u00e9nit\u00e9.",
+        "Avec Keyora, trouvez la maison de vos rêves et réalisez votre projet d'achat en toute sérénité.",
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=400&h=300&fit=crop',
       category: 'Guide Acheteur',
@@ -70,26 +70,26 @@ function getBlogs(superAdminId: string) {
     {
       title: "Les tendances de l'architecture moderne au Cameroun",
       slug: 'tendances-architecture-moderne',
-      excerpt: "L'architecture contemporaine camerounaise \u00e9volue. D\u00e9couvrez les styles et tendances qui fa\u00e7onnent nos villes.",
+      excerpt: "L'architecture contemporaine camerounaise évolue. Découvrez les styles et tendances qui façonnent nos villes.",
       content: [
-        "L'architecture moderne au Cameroun conna\u00eet une v\u00e9ritable renaissance. Voici les tendances qui transforment nos villes :",
+        "L'architecture moderne au Cameroun connaît une véritable renaissance. Voici les tendances qui transforment nos villes :",
         '',
         'Style contemporain afro-minimaliste',
-        'Les nouvelles constructions allient lignes \u00e9pur\u00e9es et mat\u00e9riaux locaux. Le bois, la pierre de taille et le bambou sont utilis\u00e9s pour cr\u00e9er des espaces \u00e0 la fois modernes et ancr\u00e9s dans la tradition.',
+        'Les nouvelles constructions allient lignes épurées et matériaux locaux. Le bois, la pierre de taille et le bambou sont utilisés pour créer des espaces à la fois modernes et ancrés dans la tradition.',
         '',
         'Maisons intelligentes (smart homes)',
-        "La domotique gagne du terrain : \u00e9clairage automatis\u00e9, climatisation connect\u00e9e, syst\u00e8mes de s\u00e9curit\u00e9 intelligents. Les propri\u00e9taires camerounais adoptent ces technologies pour plus de confort et d'\u00e9conomie d'\u00e9nergie.",
+        "La domotique gagne du terrain : éclairage automatisé, climatisation connectée, systèmes de sécurité intelligents. Les propriétaires camerounais adoptent ces technologies pour plus de confort et d'économie d'énergie.",
         '',
         'Architecture bioclimatique',
-        'Face aux enjeux climatiques, les architectes con\u00e7oivent des b\u00e2timents qui tirent parti du climat : ventilation naturelle, orientation optimale, toitures v\u00e9g\u00e9talis\u00e9es. Ces constructions r\u00e9duisent la consommation \u00e9nerg\u00e9tique de 30 \u00e0 50%.',
+        'Face aux enjeux climatiques, les architectes conçoivent des bâtiments qui tirent parti du climat : ventilation naturelle, orientation optimale, toitures végétalisées. Ces constructions réduisent la consommation énergétique de 30 à 50%.',
         '',
         'Espaces ouverts et modulables',
-        "Les cloisons c\u00e8dent la place aux espaces ouverts. Le salon, la salle \u00e0 manger et la cuisine ne forment plus qu'un seul espace de vie, plus convivial et lumineux.",
+        "Les cloisons cèdent la place aux espaces ouverts. Le salon, la salle à manger et la cuisine ne forment plus qu'un seul espace de vie, plus convivial et lumineux.",
         '',
-        'Mat\u00e9riaux \u00e9co-responsables',
-        'Le parpaing traditionnel est progressivement remplac\u00e9 par des mat\u00e9riaux plus durables : briques en terre cuite, b\u00e9ton cellulaire, panneaux solaires int\u00e9gr\u00e9s.',
+        'Matériaux éco-responsables',
+        'Le parpaing traditionnel est progressivement remplacé par des matériaux plus durables : briques en terre cuite, béton cellulaire, panneaux solaires intégrés.',
         '',
-        "L'architecture camerounaise moderne refl\u00e8te notre identit\u00e9 tout en s'ouvrant aux innovations mondiales.",
+        "L'architecture camerounaise moderne reflète notre identité tout en s'ouvrant aux innovations mondiales.",
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop',
       category: 'Architecture',
@@ -101,35 +101,35 @@ function getBlogs(superAdminId: string) {
     {
       title: 'Louer ou acheter au Cameroun : que choisir ?',
       slug: 'louer-ou-acheter-cameroun',
-      excerpt: "Face \u00e0 l'\u00e9volution du march\u00e9 immobilier, la question se pose : vaut-il mieux louer ou acheter ? Analyse compl\u00e8te.",
+      excerpt: "Face à l'évolution du marché immobilier, la question se pose : vaut-il mieux louer ou acheter ? Analyse complète.",
       content: [
-        "Une question revient sans cesse : faut-il louer ou acheter ? Voici une analyse d\u00e9taill\u00e9e pour vous aider \u00e0 prendre la bonne d\u00e9cision.",
+        "Une question revient sans cesse : faut-il louer ou acheter ? Voici une analyse détaillée pour vous aider à prendre la bonne décision.",
         '',
         'Avantages de la location',
-        '- Flexibilit\u00e9 : vous pouvez d\u00e9m\u00e9nager facilement selon vos besoins professionnels ou familiaux',
-        "- Pas d'entretien co\u00fbteux : le propri\u00e9taire prend en charge les r\u00e9parations",
+        '- Flexibilité : vous pouvez déménager facilement selon vos besoins professionnels ou familiaux',
+        "- Pas d'entretien coûteux : le propriétaire prend en charge les réparations",
         "- Investissement initial faible : pas d'apport personnel requis",
-        "- Id\u00e9al pour les s\u00e9jours de courte dur\u00e9e (moins de 3 ans)",
+        "- Idéal pour les séjours de courte durée (moins de 3 ans)",
         '',
         "Avantages de l'achat",
-        "- Constitution d'un patrimoine : chaque mensualit\u00e9 rembourse votre cr\u00e9dit",
-        '- Libert\u00e9 : vous faites les travaux et am\u00e9nagements que vous souhaitez',
-        "- Plus-value potentielle : l'immobilier camerounais prend en moyenne 5 \u00e0 8% par an",
-        '- Revenus locatifs : vous pouvez louer votre bien si vous d\u00e9m\u00e9nagez',
+        "- Constitution d'un patrimoine : chaque mensualité rembourse votre crédit",
+        '- Liberté : vous faites les travaux et aménagements que vous souhaitez',
+        "- Plus-value potentielle : l'immobilier camerounais prend en moyenne 5 à 8% par an",
+        '- Revenus locatifs : vous pouvez louer votre bien si vous déménagez',
         '',
         'Quand acheter ?',
         "- Vous avez un apport d'au moins 20%",
-        '- Vous comptez rester dans la m\u00eame ville plus de 5 ans',
-        '- Les taux de cr\u00e9dit sont attractifs (actuellement 8-10%)',
+        '- Vous comptez rester dans la même ville plus de 5 ans',
+        '- Les taux de crédit sont attractifs (actuellement 8-10%)',
         "- Vous voulez vous constituer un patrimoine pour votre retraite",
         '',
         'Quand louer ?',
-        '- Vous venez de commencer votre carri\u00e8re',
-        '- Vous changez fr\u00e9quemment de ville',
+        '- Vous venez de commencer votre carrière',
+        '- Vous changez fréquemment de ville',
         "- Vous n'avez pas encore d'apport personnel suffisant",
-        "- Les prix dans votre quartier cible sont trop \u00e9lev\u00e9s",
+        "- Les prix dans votre quartier cible sont trop élevés",
         '',
-        'Chez Keyora, nous vous accompagnons dans votre r\u00e9flexion pour faire le choix le plus adapt\u00e9 \u00e0 votre situation.',
+        'Chez Keyora, nous vous accompagnons dans votre réflexion pour faire le choix le plus adapté à votre situation.',
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop',
       category: 'Conseils',
@@ -139,31 +139,31 @@ function getBlogs(superAdminId: string) {
       authorId: superAdminId,
     },
     {
-      title: 'D\u00e9coration int\u00e9rieure : les styles qui subliment votre bien',
+      title: 'Décoration intérieure : les styles qui subliment votre bien',
       slug: 'decoration-interieure-styles',
-      excerpt: 'Une d\u00e9coration soign\u00e9e augmente la valeur per\u00e7ue de votre bien. D\u00e9couvrez les styles tendances au Cameroun.',
+      excerpt: 'Une décoration soignée augmente la valeur perçue de votre bien. Découvrez les styles tendances au Cameroun.',
       content: [
-        'La d\u00e9coration int\u00e9rieure transforme un simple logement en un v\u00e9ritable foyer. Voici les styles qui ont la cote au Cameroun :',
+        'La décoration intérieure transforme un simple logement en un véritable foyer. Voici les styles qui ont la cote au Cameroun :',
         '',
         'Style afro-chic',
-        'Ce style m\u00e9lange mobilier contemporain et pi\u00e8ces artisanales africaines. Tapis traditionnels, sculptures en bois, tissus wax et poteries cr\u00e9ent une atmosph\u00e8re chaleureuse et authentique. Les couleurs chaudes (ocre, terre cuite, vert for\u00eat) dominent.',
+        'Ce style mélange mobilier contemporain et pièces artisanales africaines. Tapis traditionnels, sculptures en bois, tissus wax et poteries créent une atmosphère chaleureuse et authentique. Les couleurs chaudes (ocre, terre cuite, vert forêt) dominent.',
         '',
         'Style scandinave tropical',
-        'Le minimalisme scandinave revisit\u00e9 aux couleurs des tropiques. Murs blancs, bois clair, plantes vertes abondantes et touches de couleurs vives (jaune, bleu canard). Parfait pour les petits espaces.',
+        'Le minimalisme scandinave revisité aux couleurs des tropiques. Murs blancs, bois clair, plantes vertes abondantes et touches de couleurs vives (jaune, bleu canard). Parfait pour les petits espaces.',
         '',
         'Style industriel doux',
-        "Inspir\u00e9 des lofts new-yorkais, ce style utilise le b\u00e9ton cir\u00e9, la brique apparente et le m\u00e9tal noir, adoucis par des textiles naturels (lin, coton) et un \u00e9clairage chaleureux.",
+        "Inspiré des lofts new-yorkais, ce style utilise le béton ciré, la brique apparente et le métal noir, adoucis par des textiles naturels (lin, coton) et un éclairage chaleureux.",
         '',
         'Conseils pour valoriser votre bien',
-        "- Misez sur un \u00e9clairage en couches : plafonnier, lampes sur pied, lumi\u00e8res d'accentuation",
-        '- Utilisez des miroirs pour agrandir visuellement les pi\u00e8ces',
-        '- Choisissez des couleurs neutres pour les murs (beige, blanc cass\u00e9, gris clair)',
+        "- Misez sur un éclairage en couches : plafonnier, lampes sur pied, lumières d'accentuation",
+        '- Utilisez des miroirs pour agrandir visuellement les pièces',
+        '- Choisissez des couleurs neutres pour les murs (beige, blanc cassé, gris clair)',
         "- Ajoutez des plantes vertes : elles purifient l'air et apportent de la vie",
         '',
-        'Un bien bien d\u00e9cor\u00e9 se vend ou se loue plus vite et \u00e0 un meilleur prix. Keyora vous conseille pour valoriser votre propri\u00e9t\u00e9.',
+        'Un bien bien décoré se vend ou se loue plus vite et à un meilleur prix. Keyora vous conseille pour valoriser votre propriété.',
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1565182999555-022f8953b5b6?w=400&h=300&fit=crop',
-      category: 'D\u00e9coration',
+      category: 'Décoration',
       viewCount: 2876,
       status: PostStatus.PUBLISHED,
       publishedAt: new Date('2024-01-30'),
@@ -172,34 +172,34 @@ function getBlogs(superAdminId: string) {
     {
       title: 'Comprendre le titre foncier au Cameroun',
       slug: 'comprendre-titre-foncier-cameroun',
-      excerpt: 'Le titre foncier est le document le plus important pour s\u00e9curiser votre propri\u00e9t\u00e9. Tout ce que vous devez savoir.',
+      excerpt: 'Le titre foncier est le document le plus important pour sécuriser votre propriété. Tout ce que vous devez savoir.',
       content: [
-        'Le titre foncier est le document juridique qui \u00e9tablit votre droit de propri\u00e9t\u00e9 sur un terrain ou un immeuble au Cameroun. Voici ce qu\u2019il faut absolument savoir :',
+        'Le titre foncier est le document juridique qui établit votre droit de propriété sur un terrain ou un immeuble au Cameroun. Voici ce qu’il faut absolument savoir :',
         '',
         "Qu'est-ce qu'un titre foncier ?",
-        "C'est un document officiel d\u00e9livr\u00e9 par le Conservateur Foncier qui atteste que vous \u00eates le propri\u00e9taire l\u00e9gitime d'un bien. Il contient : le num\u00e9ro de titre, la superficie, la localisation, les limites du terrain et le nom du propri\u00e9taire.",
+        "C'est un document officiel délivré par le Conservateur Foncier qui atteste que vous êtes le propriétaire légitime d'un bien. Il contient : le numéro de titre, la superficie, la localisation, les limites du terrain et le nom du propriétaire.",
         '',
         "Comment l'obtenir ?",
-        'La proc\u00e9dure comporte plusieurs \u00e9tapes :',
-        "1. D\u00e9p\u00f4t d'une demande au Service des Domaines",
-        '2. Bornage du terrain par un g\u00e9om\u00e8tre agr\u00e9\u00e9',
-        '3. Enqu\u00eate de commodo et incommodo (v\u00e9rification des voisins)',
-        '4. Publicit\u00e9 l\u00e9gale (insertion dans un journal)',
-        '5. D\u00e9livrance du titre foncier par le Conservateur',
+        'La procédure comporte plusieurs étapes :',
+        "1. Dépôt d'une demande au Service des Domaines",
+        '2. Bornage du terrain par un géomètre agréé',
+        '3. Enquête de commodo et incommodo (vérification des voisins)',
+        '4. Publicité légale (insertion dans un journal)',
+        '5. Délivrance du titre foncier par le Conservateur',
         '',
         'Pourquoi est-ce crucial ?',
         "- Sans titre foncier, vous ne pouvez pas vendre officiellement le bien",
-        '- Les banques exigent un titre foncier pour accorder un cr\u00e9dit hypoth\u00e9caire',
-        "- En cas de litige, seul le titulaire du titre foncier est prot\u00e9g\u00e9",
-        "- Le titre foncier vous prot\u00e8ge contre les expropriations abusives",
+        '- Les banques exigent un titre foncier pour accorder un crédit hypothécaire',
+        "- En cas de litige, seul le titulaire du titre foncier est protégé",
+        "- Le titre foncier vous protège contre les expropriations abusives",
         '',
-        "Pi\u00e8ges \u00e0 \u00e9viter",
-        '- M\u00e9fiez-vous des "papiers maison" qui ne sont pas des titres fonciers',
-        "- V\u00e9rifiez toujours l'authenticit\u00e9 du titre aupr\u00e8s du Conservatoire",
+        "Pièges à éviter",
+        '- Méfiez-vous des "papiers maison" qui ne sont pas des titres fonciers',
+        "- Vérifiez toujours l'authenticité du titre auprès du Conservatoire",
         "- Ne signez jamais d'acte sans avoir vu le titre foncier original",
-        '- Faites appel \u00e0 un notaire pour toutes les transactions',
+        '- Faites appel à un notaire pour toutes les transactions',
         '',
-        "La s\u00e9curisation fonci\u00e8re est la cl\u00e9 d'un investissement immobilier r\u00e9ussi. Keyora vous met en relation avec des professionnels de confiance.",
+        "La sécurisation foncière est la clé d'un investissement immobilier réussi. Keyora vous met en relation avec des professionnels de confiance.",
       ].join('\n'),
       coverUrl: 'https://images.unsplash.com/photo-1560870861-8c5348e8aa12?w=400&h=300&fit=crop',
       category: 'Juridique',
@@ -215,17 +215,18 @@ async function main() {
   console.log('🌱 Démarrage du seed Keyora...');
 
   // 1. Nettoyage de la base de données
+  await prisma.listingPhoto.deleteMany();
   await prisma.listing.deleteMany();
   await prisma.blogPost.deleteMany();
+  await prisma.supportRequest.deleteMany();
   await prisma.user.deleteMany();
 
   // 2. Préparation des mots de passe hachés
   const superAdminPassword = await bcrypt.hash('SuperAdmin123!', 10);
   const modoPassword = await bcrypt.hash('Modo123!', 10);
-  const ownerPassword = await bcrypt.hash('Owner123!', 10);
-  const buyerPassword = await bcrypt.hash('Buyer123!', 10);
+  const sellerPassword = await bcrypt.hash('Vendeur123!', 10);
 
-  // 3. Création des comptes de test
+  // 3. Création des comptes admin et modérateur
   const superAdmin = await prisma.user.create({
     data: {
       email: 'superadmin@keyora.com',
@@ -246,70 +247,273 @@ async function main() {
       role: Role.MODERATOR,
       phone: '+237672345678',
       isVerified: true,
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=moderator',
     },
   });
 
-  const seller = await prisma.user.create({
+  // 4. Création des 3 vendeurs réels
+  const thierry = await prisma.user.create({
     data: {
-      email: 'proprietaire@keyora.com',
-      passwordHash: ownerPassword,
-      fullName: 'Propriétaire Vendeur',
+      email: 'thierry@keyora.com',
+      passwordHash: sellerPassword,
+      fullName: 'Thierry Kamga',
       role: Role.SELLER,
-      phone: '+237673456789',
+      phone: '+237677112233',
       isVerified: true,
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Thierry',
     },
   });
 
-  const buyer = await prisma.user.create({
+  const ludovic = await prisma.user.create({
     data: {
-      email: 'acheteur@keyora.com',
-      passwordHash: buyerPassword,
-      fullName: 'Client Acheteur',
-      role: Role.BUYER,
-      phone: '+237674567890',
+      email: 'ludovic@keyora.com',
+      passwordHash: sellerPassword,
+      fullName: 'Ludovic Nguemo',
+      role: Role.SELLER,
+      phone: '+237677445566',
       isVerified: true,
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ludovic',
     },
   });
 
-  console.log('✅ Utilisateurs créés (4)');
+  const salam = await prisma.user.create({
+    data: {
+      email: 'salam@keyora.com',
+      passwordHash: sellerPassword,
+      fullName: 'Salam Ousmane',
+      role: Role.SELLER,
+      phone: '+237677778899',
+      isVerified: true,
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Salam',
+    },
+  });
 
-  // 4. Création des articles de blog
+  console.log('✅ Utilisateurs administratifs et vendeurs créés');
+
+  // 5. Création des articles de blog
   await prisma.blogPost.createMany({ data: getBlogs(superAdmin.id) });
   console.log('✅ Articles de blog créés (6)');
 
-  // 5. Création des annonces
-  await prisma.listing.create({
-    data: {
-      title: 'Villa moderne avec piscine — Bastos',
-      description: 'Superbe villa de standing dans le quartier diplomatique de Bastos. Piscine privée, jardin paysager, salon de réception, cuisine américaine équipée, 4 chambres avec dressing, 3 salles de bain. Gardiennage 24h/24.',
+  // 6. Création des 15 annonces réelles au Cameroun
+  const listingsData = [
+    // ─── THIERRY KAMGA (5 annonces) ──────────────────────────────────────────
+    {
+      title: 'Villa de prestige avec piscine — Bastos',
+      description: 'Somptueuse villa duplex neuve située dans le quartier sécurisé et diplomatique de Bastos. Finitions haut de gamme, grand jardin arboré, piscine à débordement, 5 chambres autonomes, vaste salon de réception et dépendance pour le personnel.',
       type: ListingType.SALE,
       propertyType: PropertyType.HOUSE,
-      price: 180000000,
-      area: 320,
-      rooms: 6,
-      bedrooms: 4,
+      price: 280000000,
+      area: 350,
+      rooms: 7,
+      bedrooms: 5,
       livingRoom: 1,
       kitchen: 1,
-      bathrooms: 3,
-      address: 'Avenue Bastos',
+      bathrooms: 4,
+      address: 'Rue de la Résidence',
       city: 'Yaoundé',
       latitude: 3.8854,
       longitude: 11.5165,
       status: ListingStatus.PUBLISHED,
       publishedAt: new Date(),
-      ownerId: seller.id,
-      photos: {
-        create: [
-          { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800', position: 0 }
-        ]
-      }
-    }
-  });
+      ownerId: thierry.id,
+      photos: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800'],
+    },
+    {
+      title: 'Appartement chic meublé de standing — Bonapriso',
+      description: 'Appartement entièrement meublé et équipé dans une résidence calme à Bonapriso. Climatisation centrale, groupe électrogène, forage, sécurité H24. Proche des restaurants et supermarchés.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.APARTMENT,
+      price: 650000,
+      area: 140,
+      rooms: 4,
+      bedrooms: 3,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 2,
+      address: 'Rue Njo-Njo',
+      city: 'Douala',
+      latitude: 4.0298,
+      longitude: 9.6974,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: thierry.id,
+      photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'],
+    },
+    {
+      title: 'Terrain titré constructible — Odza',
+      description: 'Très beau terrain plat de 600m² situé dans la zone résidentielle d\'Odza. Accès facile, électricité et eau disponibles. Parfait pour une villa familiale ou un petit projet d\'immeuble de rapport. Titre foncier individuel disponible immédiatement.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.LAND,
+      price: 25000000,
+      area: 600,
+      rooms: null,
+      bedrooms: null,
+      livingRoom: null,
+      kitchen: null,
+      bathrooms: null,
+      address: 'Odza Petit Marché',
+      city: 'Yaoundé',
+      latitude: 3.8182,
+      longitude: 11.5312,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: thierry.id,
+      photos: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'],
+    },
+    {
+      title: 'Local commercial spacieux — Centre-ville',
+      description: 'Vaste local de 180m² idéal pour bureaux ou showroom en plein cœur de Yaoundé. Vitrine sur rue passante, parking privé, sanitaires et climatisation pré-installée.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.COMMERCIAL,
+      price: 1200000,
+      area: 180,
+      rooms: 6,
+      bedrooms: null,
+      livingRoom: null,
+      kitchen: null,
+      bathrooms: 2,
+      address: 'Avenue Kennedy',
+      city: 'Yaoundé',
+      latitude: 3.8633,
+      longitude: 11.5199,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: thierry.id,
+      photos: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800'],
+    },
+    {
+      title: 'Maison contemporaine — Kotto',
+      description: 'Maison moderne de 4 chambres dans une barrière sécurisée à Kotto. Salon lumineux, cuisine moderne, cour pavée pouvant accueillir 3 voitures.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.HOUSE,
+      price: 75000000,
+      area: 200,
+      rooms: 5,
+      bedrooms: 4,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 3,
+      address: 'Kotto Bloc L',
+      city: 'Douala',
+      latitude: 4.0901,
+      longitude: 9.7712,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: thierry.id,
+      photos: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'],
+    },
 
-  await prisma.listing.create({
-    data: {
-      title: 'Appartement de luxe meublé — Golf',
-      description: 'Bel appartement très bien situé près du club de Golf. Proche de toutes commodités. Idéal pour des longs séjours.',
+    // ─── LUDOVIC NGUEMO (5 annonces) ──────────────────────────────────────────
+    {
+      title: 'Studio moderne meublé — Ngoa-Ekelle',
+      description: 'Studio entièrement équipé et meublé avec goût à Ngoa-Ekelle, à 5 minutes des universités. Lit double, kitchenette équipée, TV, connexion Wi-Fi, balcon privé. Idéal étudiant ou jeune professionnel.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.APARTMENT,
+      price: 85000,
+      area: 45,
+      rooms: 2,
+      bedrooms: 1,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 1,
+      address: 'Avenue de l\'Université',
+      city: 'Yaoundé',
+      latitude: 3.8612,
+      longitude: 11.5015,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: ludovic.id,
+      photos: ['https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800'],
+    },
+    {
+      title: 'Villa de vacances les pieds dans l\'eau — Kribi',
+      description: 'Superbe villa avec accès direct à la plage de sable fin de Kribi. 3 grandes suites, grand salon avec vue sur l\'océan, terrasse aménagée et service de conciergerie inclus. Parfait pour les vacances ou week-ends.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.HOUSE,
+      price: 1500000,
+      area: 250,
+      rooms: 5,
+      bedrooms: 3,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 3,
+      address: 'Route de Mboro',
+      city: 'Kribi',
+      latitude: 2.9377,
+      longitude: 9.9076,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: ludovic.id,
+      photos: ['https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800'],
+    },
+    {
+      title: 'Terrain agricole fertile — Obala',
+      description: 'Vaste terrain agricole de 5000m² situé en périphérie d\'Obala. Sol riche, idéal pour maraîchage, plantation de cacao ou d\'arbres fruitiers. Accès direct par piste praticable.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.LAND,
+      price: 18000000,
+      area: 5000,
+      rooms: null,
+      bedrooms: null,
+      livingRoom: null,
+      kitchen: null,
+      bathrooms: null,
+      address: 'Entrée Sud Obala',
+      city: 'Obala',
+      latitude: 4.1678,
+      longitude: 11.5332,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: ludovic.id,
+      photos: ['https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800'],
+    },
+    {
+      title: 'Duplex contemporain luxueux — Santa Barbara',
+      description: 'Magnifique duplex moderne de 5 chambres situé dans le quartier huppé de Santa Barbara. Prestations haut de gamme, cuisine italienne, garage fermé 2 voitures, dépendances.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.HOUSE,
+      price: 150000000,
+      area: 300,
+      rooms: 6,
+      bedrooms: 5,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 4,
+      address: 'Avenue de la Paix',
+      city: 'Yaoundé',
+      latitude: 3.9056,
+      longitude: 11.5302,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: ludovic.id,
+      photos: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800'],
+    },
+    {
+      title: 'Bel appartement familial — Bonamoussadi',
+      description: 'Appartement propre et spacieux au 2ème étage d\'un immeuble résidentiel sécurisé à Bonamoussadi. Grand séjour, balcons, cuisine avec buanderie.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.APARTMENT,
+      price: 280000,
+      area: 110,
+      rooms: 4,
+      bedrooms: 3,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 2,
+      address: 'Rue des Palmiers',
+      city: 'Douala',
+      latitude: 4.0733,
+      longitude: 9.7554,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: ludovic.id,
+      photos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'],
+    },
+
+    // ─── SALAM OUSMANE (5 annonces) ──────────────────────────────────────────
+    {
+      title: 'Appartement contemporain design — Akwa',
+      description: 'Appartement de standing avec finitions soignées en plein cœur d\'Akwa. Lumineux, climatisé, ascenseur, surveillance vidéo, parking souterrain.',
       type: ListingType.RENT,
       propertyType: PropertyType.APARTMENT,
       price: 350000,
@@ -319,72 +523,126 @@ async function main() {
       livingRoom: 1,
       kitchen: 1,
       bathrooms: 2,
-      address: 'Quartier Golf',
-      city: 'Yaoundé',
-      latitude: 3.8900,
-      longitude: 11.5200,
+      address: 'Rue Castelnau',
+      city: 'Douala',
+      latitude: 4.0507,
+      longitude: 9.7085,
       status: ListingStatus.PUBLISHED,
       publishedAt: new Date(),
-      ownerId: seller.id,
-      photos: {
-        create: [
-          { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800', position: 0 }
-        ]
-      }
-    }
-  });
-
-  await prisma.listing.create({
-    data: {
-      title: 'Terrain titré constructible — Odza',
-      description: 'Grand terrain plat et titré dans un quartier résidentiel. Excellent pour un projet immobilier à forte valeur locative.',
+      ownerId: salam.id,
+      photos: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'],
+    },
+    {
+      title: 'Loft meublé de luxe — Bastos',
+      description: 'Superbe loft en duplex meublé dans un style industriel contemporain. Idéal pour expatriés ou séjours d\'affaires. Internet fibre optique, ménage inclus.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.APARTMENT,
+      price: 800000,
+      area: 90,
+      rooms: 3,
+      bedrooms: 1,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 1,
+      address: 'Rue de la Cascade',
+      city: 'Yaoundé',
+      latitude: 3.8899,
+      longitude: 11.5188,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: salam.id,
+      photos: ['https://images.unsplash.com/photo-1502672017483-7c8a6c25118c?w=800'],
+    },
+    {
+      title: 'Terrain commercial en bordure de route — Limbe',
+      description: 'Opportunité rare : terrain de 1200m² en bordure d\'axe routier principal à Limbe. Parfait pour hôtel, supermarché ou station-service. Vue mer partielle, entièrement plat.',
       type: ListingType.SALE,
       propertyType: PropertyType.LAND,
-      price: 45000000,
-      area: 1000,
+      price: 65000000,
+      area: 1200,
       rooms: null,
-      bathrooms: null,
       bedrooms: null,
       livingRoom: null,
       kitchen: null,
-      address: 'Odza Borne 10',
-      city: 'Yaoundé',
-      latitude: 3.8200,
-      longitude: 11.5300,
-      status: ListingStatus.PENDING,
-      ownerId: seller.id,
-      photos: {
-        create: [
-          { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800', position: 0 }
-        ]
-      }
-    }
-  });
+      bathrooms: null,
+      address: 'Coastal Highway',
+      city: 'Limbe',
+      latitude: 4.0167,
+      longitude: 9.2167,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: salam.id,
+      photos: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'],
+    },
+    {
+      title: 'Villa duplex contemporaine — Logbessou',
+      description: 'Grande villa de 6 pièces neuve à Logbessou. 4 chambres spacieuses, 3 douches, grand salon, cuisine spacieuse, jardin, barrière avec portail automatique.',
+      type: ListingType.SALE,
+      propertyType: PropertyType.HOUSE,
+      price: 85000000,
+      area: 280,
+      rooms: 6,
+      bedrooms: 4,
+      livingRoom: 1,
+      kitchen: 1,
+      bathrooms: 3,
+      address: 'Logbessou Entrée Chefferie',
+      city: 'Douala',
+      latitude: 4.0855,
+      longitude: 9.7891,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: salam.id,
+      photos: ['https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800'],
+    },
+    {
+      title: 'Bureaux professionnels modernes — Akwa',
+      description: 'Étage complet de bureaux cloisonnés de 250m² à louer. Très bien situé sur axe commercial majeur d\'Akwa. Idéal agence, cabinet médical ou siège social.',
+      type: ListingType.RENT,
+      propertyType: PropertyType.COMMERCIAL,
+      price: 2000000,
+      area: 250,
+      rooms: 8,
+      bedrooms: null,
+      livingRoom: null,
+      kitchen: null,
+      bathrooms: 3,
+      address: 'Boulevard de la Liberté',
+      city: 'Douala',
+      latitude: 4.0488,
+      longitude: 9.6991,
+      status: ListingStatus.PUBLISHED,
+      publishedAt: new Date(),
+      ownerId: salam.id,
+      photos: ['https://images.unsplash.com/photo-1497366216548-37526070297c?w=800'],
+    },
+  ];
 
-  console.log('✅ Annonces créées (3)');
+  for (const item of listingsData) {
+    const { photos, ...listingFields } = item;
+    await prisma.listing.create({
+      data: {
+        ...listingFields,
+        photos: {
+          create: photos.map((url, index) => ({ url, position: index })),
+        },
+      },
+    });
+  }
+
+  console.log('✅ 15 Annonces réelles du Cameroun créées');
   console.log('🎉 Seed terminé avec succès ! La base de données est prête.');
-  
-  // Affichage des identifiants de connexion
-  console.log('\n📝 IDENTIFIANTS DE CONNEXION:\n');
+
+  console.log('\n📝 IDENTIFIANTS DE CONNEXION DE TEST:\n');
   console.log('🔐 SUPER ADMIN:');
-  console.log('   Email: superadmin@keyora.com');
-  console.log('   Mot de passe: SuperAdmin123!\n');
+  console.log('   Email: superadmin@keyora.com / SuperAdmin123!');
   console.log('🔐 MODÉRATEUR:');
-  console.log('   Email: moderateur@keyora.com');
-  console.log('   Mot de passe: Modo123!\n');
-  console.log('🔐 VENDEUR:');
-  console.log('   Email: proprietaire@keyora.com');
-  console.log('   Mot de passe: Owner123!\n');
-  console.log('🔐 ACHETEUR:');
-  console.log('   Email: acheteur@keyora.com');
-  console.log('   Mot de passe: Buyer123!\n');
+  console.log('   Email: moderateur@keyora.com / Modo123!');
+  console.log('🔐 VENDEURS (Thierry, Ludovic, Salam):');
+  console.log('   Emails: thierry@keyora.com, ludovic@keyora.com, salam@keyora.com');
+  console.log('   Mot de passe: Vendeur123!\n');
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

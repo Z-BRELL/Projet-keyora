@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useAuthStore } from './store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -33,7 +34,8 @@ export function useNotificationStream(options: UseNotificationStreamOptions = {}
       esRef.current.close();
     }
 
-    const url = `${API_URL}/api/notifications/stream`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const url = `${API_URL}/api/notifications/stream${token ? `?token=${token}` : ''}`;
     const es = new EventSource(url, { withCredentials: true });
     esRef.current = es;
 
