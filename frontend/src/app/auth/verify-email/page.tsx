@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
+import { authApi } from '@/lib/api';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -23,23 +24,14 @@ function VerifyEmailContent() {
 
     const verifyEmail = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-        const response = await fetch(`${apiUrl}/api/auth/verify-email?token=${token}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setAuth(data.user, data.accessToken, data.refreshToken);
-          setStatus('success');
-          setMessage('Email vérifié avec succès ! Connexion automatique en cours...');
-          setTimeout(() => router.push('/dashboard'), 2000);
-        } else {
-          const error = await response.json();
-          setStatus('error');
-          setMessage(error.message || 'Erreur lors de la vérification de votre email.');
-        }
-      } catch (err) {
+        const { data } = await authApi.verifyEmail(token);
+        setAuth(data.user, data.accessToken, data.refreshToken);
+        setStatus('success');
+        setMessage('Email vérifié avec succès ! Connexion automatique en cours...');
+        setTimeout(() => router.push('/dashboard'), 2000);
+      } catch (err: any) {
         setStatus('error');
-        setMessage('Une erreur est survenue. Veuillez réessayer.');
+        setMessage(err.response?.data?.message || 'Erreur lors de la vérification de votre email.');
       }
     };
 

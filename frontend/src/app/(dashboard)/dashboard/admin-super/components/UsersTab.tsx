@@ -32,6 +32,7 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => usersApi.deleteUser(id),
@@ -59,6 +60,7 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
     setFullName(u.fullName || '');
     setEmail(u.email || '');
     setPhone(u.phone || '');
+    setIsVerified(u.isVerified || false);
   };
 
   const handleUpdateSubmit = (e: React.FormEvent) => {
@@ -69,7 +71,7 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
     }
     updateProfileMutation.mutate({
       id: editingUser.id,
-      data: { fullName, email, phone },
+      data: { fullName, email, phone, isVerified },
     });
   };
 
@@ -176,7 +178,33 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
                   return (
                     <tr key={u.id} className="hover:bg-gray-50/50">
                       <td className="px-4 py-3"><p className="font-semibold text-gray-900">{u.fullName}</p></td>
-                      <td className="px-4 py-3 text-gray-600 text-xs">{u.email}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <span className="text-gray-600 text-xs">{u.email}</span>
+                          <button
+                            onClick={() => {
+                              const newStatus = !u.isVerified;
+                              const confirmMsg = newStatus 
+                                ? `Marquer le compte de ${u.fullName} comme vérifié ?`
+                                : `Marquer le compte de ${u.fullName} comme non-vérifié ?`;
+                              if (confirm(confirmMsg)) {
+                                updateProfileMutation.mutate({
+                                  id: u.id,
+                                  data: { fullName: u.fullName, email: u.email, phone: u.phone, isVerified: newStatus }
+                                });
+                              }
+                            }}
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold w-max transition-colors ${
+                              u.isVerified 
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                            }`}
+                            title={u.isVerified ? "E-mail validé. Cliquer pour révoquer." : "E-mail non validé. Cliquer pour valider manuellement."}
+                          >
+                            {u.isVerified ? 'Vérifié' : 'Non vérifié'}
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-gray-600 text-xs">{u.phone || '—'}</td>
                       <td className="px-4 py-3">
                         <select value={u.role} onChange={(e) => {
@@ -316,6 +344,18 @@ export function UsersTab({ usersData, loadingUsers, changeRoleMutation }: any) {
               <div>
                 <label className="text-xs font-bold text-gray-700 mb-1 block">Téléphone</label>
                 <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm" />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="isVerifiedCheckbox"
+                  checked={isVerified}
+                  onChange={(e) => setIsVerified(e.target.checked)}
+                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <label htmlFor="isVerifiedCheckbox" className="text-xs font-bold text-gray-700 select-none cursor-pointer">
+                  Compte vérifié / E-mail validé
+                </label>
               </div>
 
               <div className="flex gap-2.5 pt-2">

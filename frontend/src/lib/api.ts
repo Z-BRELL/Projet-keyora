@@ -34,11 +34,25 @@ import type {
   UpdateRoleDto,
 } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const getApiUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL !== 'http://localhost:4000') {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    // Si on est en production sur Vercel (pas localhost), on cible automatiquement le backend Render de production
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://keyora-backend.onrender.com';
+    }
+  }
+  return 'http://localhost:4000';
+};
+
+export const API_URL = getApiUrl();
 
 export const api = axios.create({
   baseURL: `${API_URL}/api`,
-  timeout: 30000,
+  timeout: 60000, // Augmenté à 60s pour gérer le cold start de Render
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
@@ -98,6 +112,8 @@ export const authApi = {
     api.post<Pick<AuthTokens, 'accessToken' | 'refreshToken'>>('/auth/refresh', data ?? {}),
   resendVerification: (email: string) =>
     api.post<ApiMessage>('/auth/resend-verification', { email }),
+  verifyEmail: (token: string) =>
+    api.get<AuthTokens>('/auth/verify-email', { params: { token } }),
 };
 
 export const listingsApi = {

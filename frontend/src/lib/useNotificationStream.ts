@@ -4,8 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuthStore } from './store';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from './api';
 
 interface IncomingNotification {
   type?: 'connected' | 'MESSAGE' | 'MODERATION' | 'ALERT';

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserPlus, Loader2, Mail, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { authApi } from '@/lib/api';
+import type { Role } from '@/lib/types';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -44,28 +46,18 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-          role: formData.role,
-        }),
+      await authApi.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: formData.role as Role,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erreur lors de l\'inscription');
-      }
 
       toast.success('Inscription réussie! Vérifiez votre email.');
       setTimeout(() => router.push('/auth/login'), 2000);
     } catch (err: any) {
-      toast.error(err.message || 'Erreur lors de l\'inscription');
+      toast.error(err.response?.data?.message || err.message || 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }

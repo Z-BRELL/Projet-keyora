@@ -280,6 +280,7 @@ export class UsersService {
         phone: dto.phone !== undefined ? dto.phone : undefined,
         email: dto.email || undefined,
         avatarUrl: dto.avatarUrl || undefined,
+        isVerified: dto.isVerified !== undefined ? dto.isVerified : undefined,
       },
       select: {
         id: true,
@@ -287,6 +288,7 @@ export class UsersService {
         email: true,
         phone: true,
         role: true,
+        isVerified: true,
       },
     });
   }

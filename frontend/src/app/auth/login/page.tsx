@@ -15,10 +15,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const handleResend = async () => {
+    if (!email) return;
+    setResending(true);
+    try {
+      await authApi.resendVerification(email);
+      toast.success('Lien d\'activation envoyé ! Vérifiez votre boîte mail.');
+      setShowResend(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Erreur lors du renvoi du lien.');
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setShowResend(false);
 
     try {
       const { data } = await authApi.login({ email, password });
@@ -37,7 +54,11 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Erreur lors de la connexion');
+      const msg = err.response?.data?.message || err.message || '';
+      toast.error(msg || 'Erreur lors de la connexion');
+      if (msg.toLowerCase().includes('non vérifié') || msg.toLowerCase().includes('activation') || msg.toLowerCase().includes('email')) {
+        setShowResend(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -107,6 +128,20 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        {showResend && (
+          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg text-center">
+            <p className="text-sm text-orange-800 mb-2">Votre compte n'est pas encore activé.</p>
+            <button
+              type="button"
+              disabled={resending}
+              onClick={handleResend}
+              className="text-sm text-primary-500 font-bold hover:underline disabled:opacity-50"
+            >
+              {resending ? 'Envoi en cours...' : "Renvoyer l'e-mail d'activation"}
+            </button>
+          </div>
+        )}
 
         <div className="mt-6 pt-6 border-t border-gray-200 text-center">
           <p className="text-gray-600 text-sm">
