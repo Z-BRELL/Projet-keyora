@@ -14,11 +14,26 @@ async function bootstrap() {
 
   // ─── CORS (autorise les cookies cross-origin) ─────────────────────────────
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000'
-    ],
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+      ].filter(Boolean);
+
+      const isAllowed = allowedOrigins.includes(origin) || 
+        /^https:\/\/projet-keyora.*\.vercel\.app$/.test(origin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, false); // Permet de rejeter proprement sans lever d'exception non gérée
+      }
+    },
     credentials: true, // Obligatoire pour envoyer/recevoir les cookies
   });
 

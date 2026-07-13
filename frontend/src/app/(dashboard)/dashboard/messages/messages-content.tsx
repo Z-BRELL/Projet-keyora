@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { messagesApi, usersApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import { useMessageStream } from '@/lib/useMessageStream';
+import { useSocket } from '@/providers/SocketProvider';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Loader2, Search, SquarePen, Home, Phone, Info, CheckCheck, Paperclip, Camera, Send, ExternalLink, Calendar, Bed, Bath, Maximize2, Waves, X, User as UserIcon, MessageSquare, ArrowLeft } from 'lucide-react';
@@ -82,18 +82,29 @@ export default function MessagesPageContent() {
     enabled: isMounted && !!user && searchQuery.trim().length >= 2,
   });
 
-  // Websockets / SSE
-  useMessageStream({
-    showToast: true,
-    onMessage: (msg) => {
-      if (msg.senderId === selectedChat) {
+  const { socket, onlineUsers, isConnected } = useSocket();
+
+  // Websockets
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (msg: any) => {
+      if (msg.senderId === selectedChat || msg.recipientId === selectedChat) {
         refetch();
         setTimeout(() => scrollToBottom(), 100);
       }
       refetchConversations();
       qc.invalidateQueries({ queryKey: ['unreadCount'] });
-    },
-  });
+    };
+
+    socket.on('newMessage', handleNewMessage);
+    socket.on('messageSent', handleNewMessage);
+
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      socket.off('messageSent', handleNewMessage);
+    };
+  }, [socket, selectedChat, refetch, refetchConversations, qc]);
 
   // Initial messages
   useEffect(() => {
@@ -158,7 +169,20 @@ export default function MessagesPageContent() {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedChat) return;
-    sendMutation.mutate(newMessage);
+
+    if (socket && isConnected) {
+      socket.emit('sendMessage', {
+        recipientId: selectedChat,
+        content: newMessage,
+        listingId: listingId || undefined,
+      });
+      setNewMessage('');
+      inputRef.current?.focus();
+      // On n'a pas besoin de refetch() immédiat car handleNewMessage s'en chargera
+      // à la réception de l'événement 'messageSent'
+    } else {
+      sendMutation.mutate(newMessage);
+    }
   };
 
   const selectedConversation = conversations.find((c: any) => c.contactId === selectedChat) || (() => {
@@ -240,8 +264,11 @@ export default function MessagesPageContent() {
                               {chat.contactName?.charAt(0).toUpperCase() || 'U'}
                             </div>
                           )}
-                          {chat.unread && (
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-surface-container-lowest"></div>
+                          {onlineUsers.includes(chat.contactId) && (
+                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
+                          )}
+                          {chat.unread && !onlineUsers.includes(chat.contactId) && (
+                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-secondary rounded-full border-2 border-white"></div>
                           )}
                         </div>
                         <div className="flex-grow min-w-0">
@@ -352,9 +379,15 @@ export default function MessagesPageContent() {
                   )}
                   <div>
                     <h2 className="font-label-md text-label-md text-on-surface">{selectedConversation?.contactName || 'Contact'}</h2>
-                    <p className="font-label-sm text-label-sm text-green-600 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span> {t('messages.online')}
-                    </p>
+                    {onlineUsers.includes(selectedConversation?.contactId || '') ? (
+                      <p className="font-label-sm text-label-sm text-green-600 flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span> En ligne
+                      </p>
+                    ) : (
+                      <p className="font-label-sm text-label-sm text-gray-400 flex items-center gap-1">
+                        <span className="w-2 h-2 bg-gray-300 rounded-full inline-block"></span> Hors ligne
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-sm text-on-surface-variant">

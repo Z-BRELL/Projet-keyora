@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
+import { HealthModule } from './common/health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ListingsModule } from './listings/listings.module';
@@ -17,6 +18,7 @@ import { BlogModule } from './blog/blog.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
 import { SupportRequestsModule } from './support-requests/support-requests.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { SupportRequestsModule } from './support-requests/support-requests.modul
     EventEmitterModule.forRoot(),
     RedisModule,
     PrismaModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     ListingsModule,
@@ -41,6 +44,7 @@ import { SupportRequestsModule } from './support-requests/support-requests.modul
     DashboardModule,
     ReportsModule,
     SupportRequestsModule,
+    ChatModule,
   ],
 })
 export class AppModule {}
