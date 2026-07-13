@@ -75,27 +75,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (!senderId) return;
 
-    // Sauvegarder le message en DB
-    const message = await this.prisma.message.create({
-      data: {
-        content: payload.content,
-        senderId,
-        recipientId: payload.recipientId,
-        listingId: payload.listingId,
-      },
-      include: {
-        sender: { select: { id: true, fullName: true, avatarUrl: true } },
+    try {
+      // Sauvegarder le message en DB
+      const message = await this.prisma.message.create({
+        data: {
+          content: payload.content,
+          senderId,
+          recipientId: payload.recipientId,
+          listingId: payload.listingId,
+        },
+        include: {
+          sender: { select: { id: true, fullName: true, avatarUrl: true } },
+        }
+      });
+
+      // Envoyer au destinataire s'il est connecté
+      const recipientSocketId = this.userSockets.get(payload.recipientId);
+      if (recipientSocketId) {
+        this.server.to(recipientSocketId).emit('newMessage', message);
       }
-    });
 
-    // Envoyer au destinataire s'il est connecté
-    const recipientSocketId = this.userSockets.get(payload.recipientId);
-    if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('newMessage', message);
+      // Renvoyer l'accusé de réception à l'expéditeur
+      client.emit('messageSent', message);
+    } catch (error) {
+      this.logger.error(`Erreur d'envoi de message: ${error.message}`);
+      client.emit('messageError', { message: 'Impossible d\'envoyer le message. Le destinataire n\'existe peut-être plus.' });
     }
-
-    // Renvoyer l'accusé de réception à l'expéditeur
-    client.emit('messageSent', message);
   }
 
   @SubscribeMessage('markAsRead')

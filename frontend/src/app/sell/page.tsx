@@ -176,31 +176,24 @@ export default function SellPage() {
     const loadingToast = toast.loading("Création de votre annonce en cours...");
 
     try {
-      const listingData = {
-        title: formData.title,
-        description: formData.description,
-        price: Number(formData.price),
-        type: formData.type as 'SALE' | 'RENT',
-        propertyType: formData.propertyType as 'APARTMENT' | 'HOUSE' | 'LAND' | 'COMMERCIAL',
-        city: formData.city,
-        address: formData.address || undefined,
-        area: formData.area ? Number(formData.area) : undefined,
-        rooms: formData.rooms ? Number(formData.rooms) : undefined,
-        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
-        livingRoom: formData.livingRoom ? Number(formData.livingRoom) : undefined,
-        kitchen: formData.kitchen ? Number(formData.kitchen) : undefined,
-        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-      };
+      const submitData = new FormData();
+      submitData.append('title', formData.title);
+      submitData.append('description', formData.description);
+      submitData.append('type', formData.type);
+      submitData.append('propertyType', formData.propertyType);
+      submitData.append('price', String(Number(formData.price)));
+      submitData.append('city', formData.city);
+      if (formData.address) submitData.append('address', formData.address);
+      if (formData.area) submitData.append('area', String(Number(formData.area)));
+      if (formData.rooms) submitData.append('rooms', String(Number(formData.rooms)));
+      if (formData.bedrooms) submitData.append('bedrooms', String(Number(formData.bedrooms)));
+      if (formData.livingRoom) submitData.append('livingRoom', String(Number(formData.livingRoom)));
+      if (formData.kitchen) submitData.append('kitchen', String(Number(formData.kitchen)));
+      if (formData.bathrooms) submitData.append('bathrooms', String(Number(formData.bathrooms)));
+      images.forEach((file) => submitData.append('photos', file));
 
-      const res = await listingsApi.create(listingData);
+      const res = await listingsApi.create(submitData);
       const newListingId = res.data.id;
-
-      if (images.length > 0) {
-        toast.loading("Envoi des photos...", { id: loadingToast });
-        const imageFormData = new FormData();
-        images.forEach(file => imageFormData.append('photos', file));
-        await listingsApi.uploadPhotos(newListingId, imageFormData);
-      }
 
       toast.loading("Soumission à l'équipe de modération...", { id: loadingToast });
       await listingsApi.submit(newListingId);

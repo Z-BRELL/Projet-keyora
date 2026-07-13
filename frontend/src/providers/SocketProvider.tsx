@@ -36,7 +36,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+    const host = window.location.hostname;
+    const isNgrok = host.includes('ngrok-free.app') || host.includes('ngrok.app') || host.includes('ngrok.io');
+    const socketUrl = isNgrok ? '' : (process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000');
     
     const socketInstance = io(socketUrl, {
       auth: { token },

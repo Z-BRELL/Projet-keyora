@@ -101,7 +101,7 @@ export interface PaginatedResponse<T> {
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   user: Pick<User, 'id' | 'email' | 'fullName' | 'role'>;
 }
 
@@ -116,10 +116,6 @@ export interface RegisterDto {
 export interface LoginDto {
   email: string;
   password: string;
-}
-
-export interface RefreshTokenDto {
-  refreshToken: string;
 }
 
 // ─── Listings ─────────────────────────────────────────────────────────────────

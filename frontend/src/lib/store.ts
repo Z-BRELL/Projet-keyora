@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       setAuth: (user, accessToken, refreshToken) => {
-        // Les tokens ne sont stockés en localStorage QUE si fournis explicitement
+        // Le token n'est stocké en localStorage QUE si fourni explicitement
         // (compatibilité avec les clients n'utilisant pas les cookies)
         if (accessToken) {
           localStorage.setItem('accessToken', accessToken);

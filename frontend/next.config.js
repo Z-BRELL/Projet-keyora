@@ -18,6 +18,22 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    // Cette redirection ne s'active QUE sur votre machine locale, jamais sur Vercel !
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:4000/api/:path*',
+        },
+        {
+          source: '/socket.io/:path*',
+          destination: 'http://localhost:4000/socket.io/:path*',
+        },
+      ];
+    }
+    return [];
+  },
 };
 
 module.exports = nextConfig;

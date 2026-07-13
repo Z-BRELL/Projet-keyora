@@ -26,6 +26,7 @@ export default function MessagesPageContent() {
   const [showPropertyModal, setShowPropertyModal] = useState(false);
   const [selectedPropertyImage, setSelectedPropertyImage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [tempContact, setTempContact] = useState<any>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -186,6 +187,13 @@ export default function MessagesPageContent() {
   };
 
   const selectedConversation = conversations.find((c: any) => c.contactId === selectedChat) || (() => {
+    if (tempContact && tempContact.id === selectedChat) {
+      return {
+        contactId: tempContact.id,
+        contactName: tempContact.fullName,
+        avatarUrl: tempContact.avatarUrl,
+      };
+    }
     const searchedUser = searchResults.find((u: any) => u.id === selectedChat);
     if (searchedUser) {
       return {
@@ -311,6 +319,7 @@ export default function MessagesPageContent() {
                               key={u.id}
                               onClick={() => {
                                 setSelectedChat(u.id);
+                                setTempContact(u);
                                 setSearchQuery('');
                               }}
                               className={`p-md border-b border-outline-variant cursor-pointer transition-colors relative ${isActive ? 'bg-surface-container-low hover:bg-surface-container' : 'hover:bg-surface-container-low'}`}

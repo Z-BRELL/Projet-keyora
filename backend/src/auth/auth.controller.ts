@@ -119,10 +119,11 @@ export class AuthController {
   @ApiOperation({ summary: "Renouveler l'access token via le refresh token" })
   async refresh(
     @Body() dto: RefreshTokenDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     // Lit le refresh token depuis le cookie en priorité, sinon depuis le body
-    const token = (res.req as any)?.cookies?.[REFRESH_TOKEN_COOKIE] ?? dto?.refreshToken;
+    const token = req.cookies?.[REFRESH_TOKEN_COOKIE] ?? dto?.refreshToken;
 
     if (!token) {
       throw new UnauthorizedException('Refresh token manquant');

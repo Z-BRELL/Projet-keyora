@@ -25,7 +25,7 @@ function VerifyEmailContent() {
     const verifyEmail = async () => {
       try {
         const { data } = await authApi.verifyEmail(token);
-        setAuth(data.user, data.accessToken, data.refreshToken);
+        setAuth(data.user, data.accessToken);
         setStatus('success');
         setMessage('Email vérifié avec succès ! Connexion automatique en cours...');
         setTimeout(() => router.push('/dashboard'), 2000);

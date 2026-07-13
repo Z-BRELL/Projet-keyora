@@ -4,11 +4,9 @@ import type {
   AuthTokens,
   LoginDto,
   RegisterDto,
-  RefreshTokenDto,
   Listing,
   ListingSummary,
   ListingQueryDto,
-  CreateListingDto,
   UpdateListingDto,
   PaginatedResponse,
   FavoriteStatus,
@@ -40,6 +38,12 @@ const getApiUrl = (): string => {
   }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
+    
+    // Si c'est un visiteur depuis Ngrok, on utilise le chemin relatif pour déclencher le proxy Next.js
+    if (host.includes('ngrok-free.app') || host.includes('ngrok.app') || host.includes('ngrok.io')) {
+      return '';
+    }
+    
     // Si on est en production sur Vercel (pas localhost), on cible automatiquement le backend Render de production
     if (host !== 'localhost' && host !== '127.0.0.1') {
       return 'https://keyora-backend.onrender.com';
@@ -62,37 +66,23 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
+  // Laisse le navigateur générer le Content-Type multipart avec son boundary :
+  // le header par défaut 'application/json' de l'instance doit être retiré.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
   return config;
 });
 
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const { data } = await axios.post(
-          `${API_URL}/api/auth/refresh`,
-          refreshToken ? { refreshToken } : {},
-          { withCredentials: true },
-        );
-        if (data.accessToken) {
-          localStorage.setItem('accessToken', data.accessToken);
-          if (data.refreshToken) {
-            localStorage.setItem('refreshToken', data.refreshToken);
-          }
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-        }
-        return api(originalRequest);
-      } catch {
-        useAuthStore.getState().logout();
-        
-        // 👇 La magie anti-boucle : on ne redirige QUE si on n'est pas déjà sur l'accueil
-        if (window.location.pathname !== '/') {
-          window.location.href = '/'; 
-        }
+    if (error.response?.status === 401) {
+      useAuthStore.getState().logout();
+
+      // 👇 La magie anti-boucle : on ne redirige QUE si on n'est pas déjà sur l'accueil
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.location.href = '/';
       }
     }
     return Promise.reject(error);
@@ -108,8 +98,6 @@ export const authApi = {
     api.post<ApiMessage>('/auth/logout'),
   me: () =>
     api.get<AuthTokens['user']>('/auth/me'),
-  refresh: (data?: Partial<RefreshTokenDto>) =>
-    api.post<Pick<AuthTokens, 'accessToken' | 'refreshToken'>>('/auth/refresh', data ?? {}),
   resendVerification: (email: string) =>
     api.post<ApiMessage>('/auth/resend-verification', { email }),
   verifyEmail: (token: string) =>
@@ -121,7 +109,7 @@ export const listingsApi = {
     api.get<PaginatedResponse<ListingSummary>>('/listings', { params }),
   getOne: (id: string) =>
     api.get<Listing>(`/listings/${id}`),
-  create: (data: CreateListingDto) =>
+  create: (data: FormData) =>
     api.post<Listing>('/listings', data),
   update: (id: string, data: UpdateListingDto) =>
     api.patch<Listing>(`/listings/${id}`, data),

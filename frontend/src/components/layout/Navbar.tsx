@@ -7,7 +7,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Menu, X, Home, Search, Bell, MessageSquare, User, LogOut, Shield, LayoutDashboard } from 'lucide-react';
 import { useAuthStore, useIsModerator } from '@/lib/store';
 import { authApi, messagesApi, notificationsApi } from '@/lib/api';
-import { useMessageStream } from '@/lib/useMessageStream';
 import { useNotificationStream } from '@/lib/useNotificationStream';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -223,7 +222,7 @@ export function Navbar() {
   const isAdmin = user?.role === 'SUPERADMIN';
 
   // Temps réel pour le badge de messages non lus
-  useMessageStream({ showToast: false });
+  // Plus de useMessageStream, géré globalement ou par SocketProvider
 
   const handleLogout = async () => {
     try {

@@ -143,11 +143,12 @@ export function ListingMap({
             );
             setIsSearching(true);
             try {
+              onPolygonSearch([], geometry); // Always set the geometry immediately
               const { data } = (await searchApi.byPolygon({ polygon: coords })) as any;
-              onPolygonSearch(data.data || [], geometry);
+              onPolygonSearch(data.data || [], geometry); // Update with found listings
               toast.success(`${data.meta?.total || 0} bien(s) trouvé(s) dans la zone`);
             } catch {
-              toast.error('Erreur lors de la recherche');
+              toast.error('La recherche en direct a échoué, mais vous pouvez quand même enregistrer la zone.');
             } finally {
               setIsSearching(false);
             }
