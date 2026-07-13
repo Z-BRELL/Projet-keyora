@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   Query,
   UseGuards,
@@ -19,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, RefreshTokenDto, VerifyByEmailDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards';
 import { CurrentUser } from '../common/decorators';
 
@@ -70,7 +71,7 @@ export class AuthController {
     // ─── Pose les tokens en cookies HttpOnly ─────────────────────────────────
     res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
     });
     res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, {
       ...COOKIE_OPTIONS,
@@ -95,7 +96,7 @@ export class AuthController {
     if (result.accessToken && result.refreshToken) {
       res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, {
         ...COOKIE_OPTIONS,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, {
         ...COOKIE_OPTIONS,
@@ -112,6 +113,14 @@ export class AuthController {
   @ApiOperation({ summary: "Renvoyer l'e-mail de confirmation" })
   resendVerification(@Body('email') email: string) {
     return this.authService.resendVerification(email);
+  }
+
+  // ⚠️ TEMPORAIRE / PHASE DE TEST : pas d'authentification, voir auth.service.ts#verifyByEmail
+  @Patch('verify-by-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "[TEST] Vérifier un compte via son email, sans authentification" })
+  verifyByEmail(@Body() dto: VerifyByEmailDto) {
+    return this.authService.verifyByEmail(dto.email);
   }
 
   @Post('refresh')
@@ -138,7 +147,7 @@ export class AuthController {
       // Renouvelle les cookies
       res.cookie(ACCESS_TOKEN_COOKIE, tokens.accessToken, {
         ...COOKIE_OPTIONS,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.cookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, {
         ...COOKIE_OPTIONS,

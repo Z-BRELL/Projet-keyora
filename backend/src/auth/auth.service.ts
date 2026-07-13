@@ -155,6 +155,28 @@ export class AuthService {
     return { message: 'E-mail de confirmation renvoyé avec succès.' };
   }
 
+  // ⚠️ TEMPORAIRE / PHASE DE TEST : aucune authentification requise, sur demande explicite.
+  // N'importe qui connaissant un email peut vérifier ce compte. À retirer ou protéger
+  // (clé secrète, JWT admin...) avant l'ouverture au public — voir aussi la route
+  // équivalente protégée : PATCH /api/users/admin/verify (réservée SUPERADMIN).
+  async verifyByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new BadRequestException('Aucun utilisateur trouvé avec cet email');
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { isVerified: true, verifyToken: null },
+    });
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      role: updatedUser.role,
+      isVerified: updatedUser.isVerified,
+    };
+  }
+
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.refreshToken) throw new UnauthorizedException('Accès refusé');
@@ -180,7 +202,7 @@ export class AuthService {
   private async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwt.signAsync(payload, { secret: process.env.JWT_SECRET, expiresIn: '15m' }),
+      this.jwt.signAsync(payload, { secret: process.env.JWT_SECRET, expiresIn: '7d' }),
       this.jwt.signAsync(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' }),
     ]);
     return { accessToken, refreshToken };

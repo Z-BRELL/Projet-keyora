@@ -6,6 +6,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../common/redis/redis.service';
+import { MediaService } from '../media/media.service';
 import {
   CreateListingDto,
   UpdateListingDto,
@@ -24,6 +25,7 @@ export class ListingsService {
     private prisma: PrismaService,
     private events: EventEmitter2,
     private redis: RedisService,
+    private mediaService: MediaService,
   ) {}
 
   // ─── GEOCODING ───────────────────────────────────────────────────────────
@@ -53,7 +55,7 @@ export class ListingsService {
     return null;
   }
 
-  async create(dto: CreateListingDto, ownerId: string) {
+  async create(dto: CreateListingDto, ownerId: string, files?: Express.Multer.File[]) {
     let lat = dto.latitude;
     let lng = dto.longitude;
 
@@ -69,9 +71,19 @@ export class ListingsService {
       data: { ...dto, latitude: lat, longitude: lng, ownerId, status: ListingStatus.DRAFT },
       include: { photos: true, owner: { select: { id: true, fullName: true, email: true } } },
     });
+
+    let result = listing;
+    if (files && files.length > 0) {
+      await this.mediaService.attachPhotos(listing.id, files);
+      result = await this.prisma.listing.findUnique({
+        where: { id: listing.id },
+        include: { photos: true, owner: { select: { id: true, fullName: true, email: true } } },
+      });
+    }
+
     // Invalide toutes les listes en cache (une nouvelle annonce peut affecter les filtres)
     await this.redis.invalidatePattern(`${CACHE_PREFIX}:*`);
-    return listing;
+    return result;
   }
 
   async submit(id: string, userId: string) {

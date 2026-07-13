@@ -221,7 +221,6 @@ export default function SellPage() {
           <h1 className="text-4xl font-black text-gray-900 mb-4">Publiez votre annonce</h1>
           <p className="text-gray-500 text-lg">Vendez ou louez votre bien immobilier rapidement sur Keyora.</p>
         </div>
-
         {!user && (
           <div className="bg-blue-50 border border-blue-200 p-5 mb-8 rounded-2xl flex items-start gap-4 shadow-sm">
             <AlertCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />

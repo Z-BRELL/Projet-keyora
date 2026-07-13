@@ -1,16 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { v2 as cloudinary } from 'cloudinary';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from './s3.service';
 
 @Injectable()
 export class MediaService {
-  constructor(private prisma: PrismaService) {
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-  }
+  constructor(
+    private prisma: PrismaService,
+    private s3: S3Service,
+  ) {}
 
   async uploadListingPhotos(
     listingId: string,
@@ -28,26 +25,43 @@ export class MediaService {
       throw new BadRequestException('Annonce introuvable ou non autorisé');
     }
 
+    const existingCount = await this.prisma.listingPhoto.count({
+      where: { listingId },
+    });
+
+    const photos = await this.attachPhotos(listingId, files, existingCount);
+    return { message: `${photos.length} photo(s) uploadée(s)`, photos };
+  }
+
+  /** Upload une liste de fichiers vers S3 et crée les ListingPhoto associées. */
+  async attachPhotos(
+    listingId: string,
+    files: Express.Multer.File[],
+    startPosition = 0,
+  ) {
     const uploads = await Promise.all(
-      files.map((file, index) =>
-        this.uploadBuffer(file.buffer, `keyora/listings/${listingId}`, index),
+      files.map((file) =>
+        this.s3.uploadFile(
+          file.buffer,
+          file.mimetype,
+          file.originalname,
+          `listings/${listingId}`,
+        ),
       ),
     );
 
-    const photos = await Promise.all(
+    return Promise.all(
       uploads.map((result, index) =>
         this.prisma.listingPhoto.create({
           data: {
             listingId,
-            url: result.secure_url,
-            storageKey: result.public_id,
-            position: index,
+            url: result.url,
+            storageKey: result.key,
+            position: startPosition + index,
           },
         }),
       ),
     );
-
-    return { message: `${photos.length} photo(s) uploadée(s)`, photos };
   }
 
   async deletePhoto(photoId: string, userId: string) {
@@ -60,30 +74,10 @@ export class MediaService {
       throw new BadRequestException('Non autorisé');
     }
 
-    await cloudinary.uploader.destroy(photo.storageKey);
+    if (photo.storageKey) {
+      await this.s3.deleteFile(photo.storageKey);
+    }
     await this.prisma.listingPhoto.delete({ where: { id: photoId } });
     return { message: 'Photo supprimée' };
-  }
-
-  private uploadBuffer(
-    buffer: Buffer,
-    folder: string,
-    index: number,
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          transformation: [
-            { width: 1280, height: 960, crop: 'limit', quality: 'auto' },
-          ],
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        },
-      );
-      stream.end(buffer);
-    });
   }
 }

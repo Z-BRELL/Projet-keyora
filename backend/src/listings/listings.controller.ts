@@ -105,10 +105,16 @@ export class ListingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SELLER, Role.SUPERADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Créer une annonce (statut DRAFT)' })
+  @UseInterceptors(FilesInterceptor('photos', 10))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Créer une annonce (statut DRAFT), avec upload optionnel de photos (max 10)' })
   @ApiResponse({ status: 201, description: 'Annonce créée en brouillon' })
-  create(@Body() dto: CreateListingDto, @CurrentUser() user: any) {
-    return this.listingsService.create(dto, user.id);
+  create(
+    @Body() dto: CreateListingDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @CurrentUser() user: any,
+  ) {
+    return this.listingsService.create(dto, user.id, files);
   }
 
   @Post(':id/submit')

@@ -21,11 +21,13 @@ async function bootstrap() {
       }
       const allowedOrigins = [
         process.env.FRONTEND_URL,
+        'https://keyora.org',
+        'https://www.keyora.org',
         'http://localhost:3000',
         'http://127.0.0.1:3000'
       ].filter(Boolean);
 
-      const isAllowed = allowedOrigins.includes(origin) || 
+      const isAllowed = allowedOrigins.includes(origin) ||
         /^https:\/\/projet-keyora.*\.vercel\.app$/.test(origin);
 
       if (isAllowed) {

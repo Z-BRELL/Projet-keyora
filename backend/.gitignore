@@ -1,14 +1,18 @@
 # Dependencies
 node_modules/
 
-# Environment
+# Environment (garde .env.example, ignore tout fichier .env réel quel que soit le suffixe)
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # Build
 dist/
 build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
 
 # Prisma
 generated/

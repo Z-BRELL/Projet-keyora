@@ -41,7 +41,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-keyora}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-keyora}
       REDIS_URL: redis://redis:6379
     ports:
-      - "${PORT:-4000}:4000"
+      - "127.0.0.1:${PORT:-4000}:4000"
     depends_on:
       postgres:
         condition: service_healthy

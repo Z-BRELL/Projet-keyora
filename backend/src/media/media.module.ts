@@ -3,6 +3,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { MediaService } from './media.service';
 import { MediaController } from './media.controller';
+import { S3Service } from './s3.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { MediaController } from './media.controller';
       },
     }),
   ],
-  providers: [MediaService],
+  providers: [MediaService, S3Service],
   controllers: [MediaController],
   exports: [MediaService],
 })

@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import {
   CheckCircle, XCircle, Eye, Clock, Home,
   Maximize2, BedDouble, Bath, MapPin, User, AlertTriangle, Mail,
@@ -88,15 +87,23 @@ export default function ModerationPage() {
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-    } else if (!isModerator) {
-      router.replace('/dashboard');
-    }
-  }, [user, isModerator, router]);
+  const [isMounted, setIsMounted] = useState(false);
 
-  if (!user || !isModerator) return null;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      if (!user) {
+        router.push('/auth/login');
+      } else if (!isModerator) {
+        router.replace('/dashboard');
+      }
+    }
+  }, [user, isModerator, router, isMounted]);
+
+  if (!isMounted || !user || !isModerator) return null;
 
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['moderation', 'queue'],
@@ -216,7 +223,7 @@ export default function ModerationPage() {
                     {/* Miniature */}
                     <div className="w-24 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                       {listing.photos?.[0]?.url ? (
-                        <Image src={listing.photos[0].url} alt="" width={96} height={80} className="w-full h-full object-cover" />
+                        <img src={listing.photos[0].url} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-2xl">🏠</div>
                       )}
@@ -248,7 +255,7 @@ export default function ModerationPage() {
                       <div className="flex gap-2 mb-5 overflow-x-auto pb-2">
                         {selected.photos.map((p: any, i: number) => (
                           <div key={i} className="relative flex-shrink-0 w-40 h-28 rounded-xl overflow-hidden">
-                            <Image src={p.url} alt="" fill className="object-cover" />
+                            <img src={p.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>

@@ -293,6 +293,23 @@ export class UsersService {
     });
   }
 
+  async verifyUserByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundException('User not found');
+
+    return this.prisma.user.update({
+      where: { email },
+      data: { isVerified: true, verifyToken: null },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        isVerified: true,
+      },
+    });
+  }
+
   async searchUsers(query: string, currentUserId: string) {
     if (!query || query.trim().length < 2) return [];
     return this.prisma.user.findMany({

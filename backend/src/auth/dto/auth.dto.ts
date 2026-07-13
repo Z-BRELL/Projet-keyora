@@ -56,3 +56,9 @@ export class RefreshTokenDto {
   @IsNotEmpty()
   refreshToken: string;
 }
+
+export class VerifyByEmailDto {
+  @ApiProperty({ example: 'jean@exemple.com' })
+  @IsEmail()
+  email: string;
+}

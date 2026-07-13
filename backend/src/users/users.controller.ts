@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Delete, Body, Param, UseGuards, ForbiddenException, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsEmail } from 'class-validator';
 import { JwtAuthGuard } from '../common/guards';
 import { CurrentUser } from '../common/decorators';
 import { UsersService } from './users.service';
@@ -12,6 +12,12 @@ class UpdateRoleDto {
   @ApiProperty({ enum: Role })
   @IsEnum(Role)
   role: Role;
+}
+
+class VerifyByEmailDto {
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
+  email: string;
 }
 
 @ApiTags('users')
@@ -145,5 +151,16 @@ export class UsersController {
       throw new ForbiddenException('Only super admins can reset user passwords');
     }
     return this.usersService.adminResetPassword(id);
+  }
+
+  @Patch('admin/verify')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Vérifier un compte utilisateur via son email (superadmin only)" })
+  verifyByEmail(@Body() dto: VerifyByEmailDto, @CurrentUser() user: any) {
+    if (user.role !== 'SUPERADMIN') {
+      throw new ForbiddenException('Only super admins can verify users');
+    }
+    return this.usersService.verifyUserByEmail(dto.email);
   }
 }
