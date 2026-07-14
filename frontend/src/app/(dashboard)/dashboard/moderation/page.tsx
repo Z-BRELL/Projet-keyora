@@ -9,7 +9,8 @@ import {
 import { Navbar } from '@/components/layout/Navbar';
 import { moderationApi } from '@/lib/api';
 import { formatPrice, formatDate, propertyTypeLabel } from '@/lib/utils';
-import { useAuthStore, useIsModerator } from '@/lib/store';
+import { useIsModerator } from '@/lib/store';
+import { useRequireAuth } from '@/lib/useRequireAuth';
 import { getApiError } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -81,41 +82,35 @@ function RejectModal({ listing, onClose, onConfirm }: {
 
 export default function ModerationPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isMounted } = useRequireAuth();
   const isModerator = useIsModerator();
   const qc = useQueryClient();
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
 
-  const [isMounted, setIsMounted] = useState(false);
+  // N'évalue le rôle qu'une fois le store réhydraté (cf. useRequireAuth),
+  // sinon "user" vaut encore null juste après une actualisation de page.
+  const authorized = isMounted && !!user && isModerator;
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isMounted) {
-      if (!user) {
-        router.push('/auth/login');
-      } else if (!isModerator) {
-        router.replace('/dashboard');
-      }
+    if (isMounted && user && !isModerator) {
+      router.replace('/dashboard');
     }
-  }, [user, isModerator, router, isMounted]);
-
-  if (!isMounted || !user || !isModerator) return null;
+  }, [isMounted, user, isModerator, router]);
 
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['moderation', 'queue'],
     queryFn: () => moderationApi.getQueue(),
     select: (r) => r.data,
     refetchInterval: 30000,
+    enabled: authorized,
   });
 
   const { data: stats } = useQuery({
     queryKey: ['moderation', 'stats'],
     queryFn: () => moderationApi.getStats(),
     select: (r) => r.data,
+    enabled: authorized,
   });
 
   const approveMutation = useMutation({
@@ -141,6 +136,8 @@ export default function ModerationPage() {
   });
 
   const selected = queue.find((l: any) => l.id === selectedListing);
+
+  if (!authorized) return null;
 
   return (
     <>

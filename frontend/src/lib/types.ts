@@ -101,7 +101,6 @@ export interface PaginatedResponse<T> {
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken?: string;
   user: Pick<User, 'id' | 'email' | 'fullName' | 'role'>;
 }
 
@@ -226,6 +225,30 @@ export interface AlertZone {
   active: boolean;
   userId: string;
   createdAt: string;
+  /** Nombre d'annonces publiées correspondant actuellement à cette zone (calculé à la volée). */
+  matchCount: number;
+}
+
+export interface AlertZoneMatchListing {
+  id: string;
+  title: string;
+  price: number;
+  area?: number | null;
+  city?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  type: ListingType;
+  propertyType?: PropertyType | null;
+  viewCount: number;
+  publishedAt?: string | null;
+  cover_photo?: { url: string; position: number } | null;
+}
+
+export interface AlertZoneMatches {
+  zone: Pick<AlertZone, 'id' | 'label'>;
+  count: number;
+  listings: AlertZoneMatchListing[];
 }
 
 export interface CreateAlertZoneDto {

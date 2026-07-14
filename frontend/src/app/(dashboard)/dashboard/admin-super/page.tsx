@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { dashboardApi, moderationApi, usersApi, blogApi, supportApi } from '@/lib/api';
-import { useAuthStore } from '@/lib/store';
+import { useRequireAuth } from '@/lib/useRequireAuth';
 import { useTranslation } from '@/lib/i18n';
 import { LayoutDashboard, ShieldCheck, Home, Users, BookOpen, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -30,21 +30,17 @@ type TabId = typeof TABS[number]['id'];
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isMounted } = useRequireAuth();
   const qc = useQueryClient();
   const { t } = useTranslation();
-  const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('overview');
 
-  // Redirect non-SUPERADMIN
+  // Redirect non-SUPERADMIN (une fois le store réhydraté, cf. useRequireAuth)
   useEffect(() => {
-    setIsMounted(true);
-    if (!user) {
-      router.push('/auth/login');
-    } else if (user.role !== 'SUPERADMIN') {
+    if (isMounted && user && user.role !== 'SUPERADMIN') {
       router.push('/dashboard');
     }
-  }, [user, router]);
+  }, [isMounted, user, router]);
 
   // Overview Data
   const { data: adminData } = useQuery({

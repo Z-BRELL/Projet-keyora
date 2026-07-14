@@ -82,7 +82,9 @@ export default function SellPage() {
     }
     try {
       const res = await searchApi.cities(query);
-      setCitySuggestions(res.data || []);
+      // Le backend renvoie [{ city, count }, ...] (regroupé par popularité), pas de simples chaînes.
+      const cities = (res.data || []).map((row: any) => typeof row === 'string' ? row : row.city);
+      setCitySuggestions(cities);
       setShowCitySuggestions(true);
     } catch {
       setCitySuggestions([]);

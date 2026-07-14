@@ -1,0 +1,14 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    restart: unless-stopped
+    ports:
+      # Bind sur 127.0.0.1 uniquement : Nginx (même hôte) fait le reverse-proxy
+      # TLS. Le port n'est jamais exposé directement à internet.
+      - "127.0.0.1:${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production

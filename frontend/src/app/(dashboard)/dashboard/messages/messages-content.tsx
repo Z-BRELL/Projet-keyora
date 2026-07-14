@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { messagesApi, usersApi } from '@/lib/api';
+import { messagesApi, usersApi, listingsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useSocket } from '@/providers/SocketProvider';
 import { format } from 'date-fns';
@@ -212,6 +212,22 @@ export default function MessagesPageContent() {
     city: listingCity,
     photos: [{ url: listingPhoto }]
   } : null);
+
+  const { data: fullListingDetails } = useQuery({
+    queryKey: ['listing', activeListing?.id],
+    queryFn: async () => {
+      if (!activeListing?.id) return null;
+      try {
+        const response = await listingsApi.getOne(activeListing.id);
+        return response.data;
+      } catch {
+        return null;
+      }
+    },
+    enabled: isMounted && !!user && !!activeListing?.id,
+  });
+
+  const displayListing = fullListingDetails || activeListing;
 
   const filteredConversations = conversations.filter((c: any) => 
     c.contactName?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -514,42 +530,42 @@ export default function MessagesPageContent() {
         </section>
 
         {/* Right Column: Context Sidebar (Property Details) */}
-        {activeListing ? (
+        {displayListing ? (
           <aside className="w-80 bg-surface-container-lowest rounded-xl border border-outline-variant hidden lg:flex flex-col h-full overflow-y-auto shadow-sm">
             <div className="p-md border-b border-outline-variant bg-surface-bright sticky top-0 z-10">
               <h3 className="font-label-md text-label-md text-on-surface">{t('messages.aboutProperty')}</h3>
             </div>
             <div className="p-md">
               <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-md border border-outline-variant shadow-sm bg-gray-100 flex items-center justify-center">
-                {activeListing.photos?.[0]?.url || activeListing.photo ? (
-                  <img src={activeListing.photos?.[0]?.url || activeListing.photo} alt="Property" className="w-full h-full object-cover" />
+                {displayListing.photos?.[0]?.url || displayListing.photo ? (
+                  <img src={displayListing.photos?.[0]?.url || displayListing.photo} alt="Property" className="w-full h-full object-cover" />
                 ) : (
                   <Home className="w-10 h-10 text-gray-300" />
                 )}
-                {activeListing.isHotDeal && (
+                {displayListing.isHotDeal && (
                   <div className="absolute top-2 right-2 bg-secondary text-on-secondary px-2 py-1 rounded font-label-sm text-label-sm font-bold shadow-sm">
                     Hot Deal
                   </div>
                 )}
               </div>
               <h4 className="font-headline-md text-xl font-bold text-on-surface mb-xs leading-tight">
-                {activeListing.title || 'Propriété'}
+                {displayListing.title || 'Propriété'}
               </h4>
               <p className="font-headline-md text-lg text-secondary font-bold mb-md">
-                {activeListing.price ? `${activeListing.price.toLocaleString('fr-FR')} FCFA` : 'Prix sur demande'}
+                {displayListing.price ? `${displayListing.price.toLocaleString('fr-FR')} FCFA` : 'Prix sur demande'}
               </p>
               <div className="grid grid-cols-2 gap-sm mb-lg">
                 <div className="flex items-center gap-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low p-2 rounded">
                   <Bed className="w-4 h-4 text-secondary" />
-                  {activeListing.bedrooms || '-'} Lits
+                  {displayListing.bedrooms || '-'} Lits
                 </div>
                 <div className="flex items-center gap-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low p-2 rounded">
                   <Bath className="w-4 h-4 text-secondary" />
-                  {activeListing.bathrooms || '-'} Sdb
+                  {displayListing.bathrooms || '-'} Sdb
                 </div>
                 <div className="flex items-center gap-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low p-2 rounded">
                   <Maximize2 className="w-4 h-4 text-secondary" />
-                  {activeListing.area || '-'} m²
+                  {displayListing.area || '-'} m²
                 </div>
                 <div className="flex items-center gap-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container-low p-2 rounded">
                   <Waves className="w-4 h-4 text-secondary" />
@@ -557,7 +573,7 @@ export default function MessagesPageContent() {
                 </div>
               </div>
               <div className="border-t border-outline-variant pt-md">
-                <Link href={`/listings/${activeListing.id}`} className="w-full py-2 px-4 border border-primary text-primary font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors mb-sm flex justify-center items-center gap-sm">
+                <Link href={`/listings/${displayListing.id}`} className="w-full py-2 px-4 border border-primary text-primary font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors mb-sm flex justify-center items-center gap-sm">
                   <ExternalLink className="w-4 h-4" />
                   {t('messages.viewListing')}
                 </Link>

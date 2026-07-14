@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       const { data } = await authApi.login({ email, password });
 
-      setAuth(data.user, data.accessToken, data.refreshToken);
+      setAuth(data.user, data.accessToken);
 
       toast.success('Connexion réussie!');
       

@@ -17,6 +17,7 @@ import type {
   ModerationLog,
   ModerationStats,
   AlertZone,
+  AlertZoneMatches,
   CreateAlertZoneDto,
   Message,
   Conversation,
@@ -139,7 +140,7 @@ export const searchApi = {
   byRadius: (params: RadiusSearchParams) =>
     api.get<ListingWithDistance[]>('/search/radius', { params }),
   cities: (q: string) =>
-    api.get<string[]>('/search/cities', { params: { q } }),
+    api.get<{ city: string; count: number }[]>('/search/cities', { params: { q } }),
 };
 
 export const moderationApi = {
@@ -166,6 +167,8 @@ export const alertsApi = {
     api.patch<AlertZone>(`/alerts/zones/${id}/toggle`),
   delete: (id: string) =>
     api.delete<ApiMessage>(`/alerts/zones/${id}`),
+  getMatches: (id: string) =>
+    api.get<AlertZoneMatches>(`/alerts/zones/${id}/matches`),
 };
 
 export const messagesApi = {

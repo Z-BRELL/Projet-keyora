@@ -52,7 +52,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
         
         try {
           const { data } = await authApi.login({ email, password });
-          setAuth(data.user, data.accessToken, data.refreshToken);
+          setAuth(data.user, data.accessToken);
           toast.success('Compte créé avec succès ! Vous êtes connecté.');
           onClose();
           router.push('/dashboard');
@@ -68,7 +68,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
       } else {
         try {
           const { data } = await authApi.login({ email, password });
-          setAuth(data.user, data.accessToken, data.refreshToken);
+          setAuth(data.user, data.accessToken);
           toast.success(`Bon retour, ${data.user.fullName.split(' ')[0]} !`);
           onClose();
           

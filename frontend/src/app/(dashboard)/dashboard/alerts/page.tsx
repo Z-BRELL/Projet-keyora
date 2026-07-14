@@ -5,8 +5,9 @@ import { useAuthStore } from '@/lib/store';
 import { useRequireAuth } from '@/lib/useRequireAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, MapPin, Filter, Pencil } from 'lucide-react';
+import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, MapPin, Filter, Pencil, Eye, X, Loader2 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
+import { ListingCard } from '@/components/listing/ListingCard';
 import { alertsApi } from '@/lib/api';
 import { formatDate, getApiError } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -26,6 +27,7 @@ export default function AlertsPage() {
   const [drawnGeo, setDrawnGeo] = useState<any>(null);
   const [label, setLabel] = useState('');
   const [filters, setFilters] = useState({ type: '', minPrice: '', maxPrice: '' });
+  const [viewingZone, setViewingZone] = useState<any>(null);
 
   const { data: zones = [], isLoading } = useQuery({
     queryKey: ['alerts', 'zones'],
@@ -65,6 +67,13 @@ export default function AlertsPage() {
   const toggleMutation = useMutation({
     mutationFn: (id: string) => alertsApi.toggle(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts'] }),
+  });
+
+  const { data: matches, isLoading: loadingMatches } = useQuery({
+    queryKey: ['alerts', 'matches', viewingZone?.id],
+    queryFn: () => alertsApi.getMatches(viewingZone.id),
+    select: (r) => r.data,
+    enabled: !!viewingZone,
   });
 
   const resetForm = () => {
@@ -280,7 +289,11 @@ export default function AlertsPage() {
           ) : (
             <div className="space-y-3">
               {zones.map((zone: any) => (
-                <div key={zone.id} className={`card p-5 flex items-center gap-4 ${!zone.active ? 'opacity-60' : ''}`}>
+                <div
+                  key={zone.id}
+                  onClick={() => setViewingZone(zone)}
+                  className={`card p-5 flex items-center gap-4 cursor-pointer hover:shadow-card-hover transition-shadow ${!zone.active ? 'opacity-60' : ''}`}
+                >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${zone.active ? 'bg-primary-100' : 'bg-gray-100'}`}>
                     <Bell className={`w-5 h-5 ${zone.active ? 'text-primary-600' : 'text-gray-400'}`} />
                   </div>
@@ -297,14 +310,17 @@ export default function AlertsPage() {
                       {zone.filters?.maxPrice && (
                         <span>Max : {zone.filters.maxPrice.toLocaleString('fr-FR')} F</span>
                       )}
-                      <span>{zone._count?.matches || 0} match(s)</span>
+                      <span className="flex items-center gap-1 font-semibold text-primary-600">
+                        <Eye className="w-3.5 h-3.5" />
+                        {zone.matchCount ?? 0} annonce{(zone.matchCount ?? 0) > 1 ? 's' : ''} correspondante{(zone.matchCount ?? 0) > 1 ? 's' : ''}
+                      </span>
                       <span>Créé le {formatDate(zone.createdAt)}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                      onClick={() => handleEdit(zone)}
+                      onClick={(e) => { e.stopPropagation(); handleEdit(zone); }}
                       className="text-gray-400 hover:text-blue-600 transition-colors p-1"
                       title="Modifier"
                     >
@@ -314,7 +330,7 @@ export default function AlertsPage() {
                       {zone.active ? 'Active' : 'Inactive'}
                     </span>
                     <button
-                      onClick={() => toggleMutation.mutate(zone.id)}
+                      onClick={(e) => { e.stopPropagation(); toggleMutation.mutate(zone.id); }}
                       className="text-gray-400 hover:text-primary-600 transition-colors p-1"
                       title={zone.active ? 'Désactiver' : 'Activer'}
                     >
@@ -323,7 +339,8 @@ export default function AlertsPage() {
                         : <ToggleLeft className="w-6 h-6" />}
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (window.confirm('Supprimer cette zone d\'alerte ?')) {
                           deleteMutation.mutate(zone.id);
                         }
@@ -340,6 +357,53 @@ export default function AlertsPage() {
           )}
         </div>
       </div>
+
+      {/* Modal : annonces correspondant à une zone */}
+      {viewingZone && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setViewingZone(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
+              <div>
+                <h3 className="font-bold text-gray-900">{viewingZone.label}</h3>
+                <p className="text-sm text-gray-500">
+                  {matches ? `${matches.count} annonce${matches.count > 1 ? 's' : ''} correspondante${matches.count > 1 ? 's' : ''}` : 'Chargement…'}
+                </p>
+              </div>
+              <button onClick={() => setViewingZone(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto">
+              {loadingMatches ? (
+                <div className="flex justify-center items-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                </div>
+              ) : !matches || matches.listings.length === 0 ? (
+                <div className="text-center py-16 text-gray-400">
+                  <Bell className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                  <p>Aucune annonce ne correspond actuellement à cette zone.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {matches.listings.map((listing: any) => (
+                    <ListingCard
+                      key={listing.id}
+                      listing={{ ...listing, photos: listing.cover_photo ? [listing.cover_photo] : [] }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

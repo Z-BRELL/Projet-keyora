@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sS -i -X POST https://service.keyora.org/api/auth/login -H 'Origin: https://keyora.org' -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"wrongpass\"}')"
+    ]
+  }
+}

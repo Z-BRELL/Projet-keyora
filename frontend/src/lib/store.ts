@@ -24,7 +24,7 @@ interface AuthState {
    * Compatibilité : Si des tokens sont passés, ils sont stockés dans
    * localStorage UNIQUEMENT si les cookies ne sont pas supportés.
    */
-  setAuth: (user: User, accessToken?: string, refreshToken?: string) => void;
+  setAuth: (user: User, accessToken?: string) => void;
   clearAuth: () => void;
   logout: () => void;
   setLoading: (v: boolean) => void;
@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isLoading: false,
 
-      setAuth: (user, accessToken, refreshToken) => {
+      setAuth: (user, accessToken) => {
         // Le token n'est stocké en localStorage QUE si fourni explicitement
         // (compatibilité avec les clients n'utilisant pas les cookies)
         if (accessToken) {
@@ -45,24 +45,17 @@ export const useAuthStore = create<AuthState>()(
           // Nettoyage propre si on passe en mode cookie
           localStorage.removeItem('accessToken');
         }
-        if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-        } else {
-          localStorage.removeItem('refreshToken');
-        }
         set({ user });
       },
 
       clearAuth: () => {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         set({ user: null });
       },
 
       logout: () => {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         set({ user: null });
       },
